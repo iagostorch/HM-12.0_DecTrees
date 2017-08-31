@@ -47,6 +47,10 @@
 
 using namespace std;
 
+//gcorrea 04/03/2014
+extern int saveResData2Nx2N;
+//gcorrea 04/03/2014 END
+
 //! \ingroup TAppEncoder
 //! \{
 
@@ -405,6 +409,14 @@ Void TAppEncTop::encode()
   {
     pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, m_uiMaxCUWidth, m_uiMaxCUHeight, m_uiMaxCUDepth );
   }
+
+
+	//gcorrea 04/03/2014
+
+	saveResData2Nx2N = -1;
+
+	//gcorrea 04/03/2014 END
+
   
   while ( !bEos )
   {
@@ -413,7 +425,7 @@ Void TAppEncTop::encode()
 
     // read input YUV file
     m_cTVideoIOYuvInputFile.read( pcPicYuvOrg, m_aiPad );
-    
+
     // increase number of received frames
     m_iFrameRcvd++;
     

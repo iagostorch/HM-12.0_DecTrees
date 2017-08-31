@@ -1,4 +1,4 @@
-/* The copyright in this software is being made available under the BSD
+/* The copyexright in this software is being made available under the BSD
  * License, included below. This software may be subject to other third party
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.  
@@ -43,6 +43,12 @@
 #include <cmath>
 #include <algorithm>
 using namespace std;
+
+
+//gcorrea 04/03/2014
+extern int saveResData2Nx2N;
+extern double RDcost_MSM, RDcost_2Nx2N, RDcost_2NxN, RDcost_Nx2N, RDcost_NxN, RDcost_2NxnU, RDcost_2NxnD, RDcost_nLx2N, RDcost_nRx2N;
+//gcorrea 04/03/2014 END
 
 //! \ingroup TLibEncoder
 //! \{
@@ -388,6 +394,10 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
   Bool isAddLowestQP = false;
   Int lowestQP = -rpcTempCU->getSlice()->getSPS()->getQpBDOffsetY();
 
+  //gcorrea 03/03/2014
+  RDcost_MSM = RDcost_2Nx2N = RDcost_2NxN = RDcost_Nx2N = RDcost_NxN = RDcost_2NxnU = RDcost_2NxnD = RDcost_nLx2N = RDcost_nRx2N = 0;
+  //gcorrea 03/03/2014 END
+  
   if( (g_uiMaxCUWidth>>uiDepth) >= rpcTempCU->getSlice()->getPPS()->getMinCuDQPSize() )
   {
     Int idQP = m_pcEncCfg->getMaxDeltaQP();
@@ -443,16 +453,27 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
         // 2Nx2N
         if(m_pcEncCfg->getUseEarlySkipDetection())
         {
-          xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_2Nx2N );  rpcTempCU->initEstData( uiDepth, iQP );//by Competition for inter_2Nx2N
+		  //gcorrea: 06/09/2013
+			saveResData2Nx2N=1;
+			xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_2Nx2N );  rpcTempCU->initEstData( uiDepth, iQP );//by Competition for inter_2Nx2N
+			saveResData2Nx2N=0;
+		  //gcorrea: 06/09/2013 END
         }
         // SKIP
         xCheckRDCostMerge2Nx2N( rpcBestCU, rpcTempCU, &earlyDetectionSkipMode );//by Merge for inter_2Nx2N
+		RDcost_MSM = rpcBestCU->getTotalCost();
+
+
         rpcTempCU->initEstData( uiDepth, iQP );
 
         if(!m_pcEncCfg->getUseEarlySkipDetection())
         {
           // 2Nx2N, NxN
-          xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_2Nx2N );  rpcTempCU->initEstData( uiDepth, iQP );
+			//gcorrea: 06/09/2013
+			saveResData2Nx2N=1;
+			xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_2Nx2N );  rpcTempCU->initEstData( uiDepth, iQP );
+			saveResData2Nx2N=0;
+			//gcorrea: 06/09/2013 END
           if(m_pcEncCfg->getUseCbfFastMode())
           {
             doNotBlockPu = rpcBestCU->getQtRootCbf( 0 ) != 0;
@@ -748,6 +769,425 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
     iMaxQP  = Clip3( MIN_QP, MAX_QP, qp);
   }
 #endif
+
+//gcorrea: 03/03/2014
+  int mode = rpcBestCU->getPredictionMode( 0 );
+  int part = rpcBestCU->getPartitionSize( 0 );
+  
+  double diff_NeiDepth = 0;
+
+  int split = 1;
+
+  if(mode == 0) {
+
+	double med_Above = -1;
+	double med_AboveLeft = -1;
+	double med_AboveRight = -1;
+	double med_Left = -1;
+	double med_Colocated1 = -1;
+	double med_Colocated2 = -1;
+	double sum_med = 0;
+	double med_med = -1;
+
+	int i;
+	int j;
+	double sum;
+
+	double a2DIVa1, ABSa2DIVa1;
+	int SKIPMergeFlag, MergeFlag;
+	
+	a2DIVa1 = (double)RDcost_2Nx2N / (double)RDcost_MSM;
+
+	ABSa2DIVa1 = abs((double)RDcost_2Nx2N - (double)RDcost_MSM) / (double)RDcost_MSM;
+	
+	if(rpcBestCU->getMergeFlag( 0 ))
+		MergeFlag = 1;
+	else
+		MergeFlag = 0;
+
+	if((rpcBestCU->isSkipped( 0 ) && rpcBestCU->getMergeFlag( 0 )))
+		SKIPMergeFlag = 1;
+	else
+		SKIPMergeFlag = 0;
+
+	i = j = sum = 0;
+	for(i=0; i<256; i+=4) {
+		if(rpcBestCU->getCUAbove() != NULL) {
+			sum += (double) ((rpcBestCU->getCUAbove())->getDepth(i));
+			j++;
+		}
+	}
+	if(j>0)
+		med_Above = sum/j;
+	
+	i = j = sum = 0;
+	for(i=0; i<256; i+=4) {
+		if(rpcBestCU->getCUAboveLeft() != NULL) {
+			sum += (double) ((rpcBestCU->getCUAboveLeft())->getDepth(i));
+			j++;
+		}
+	}
+	if(j>0)
+		med_AboveLeft = sum/j;
+	
+	i = j = sum = 0;
+	for(i=0; i<256; i+=4) {
+		if(rpcBestCU->getCUAboveRight() != NULL) {
+			sum += (double) ((rpcBestCU->getCUAboveRight())->getDepth(i));
+			j++;
+		}
+	}
+	if(j>0)
+		med_AboveRight = sum/j;
+
+	i = j = sum = 0;
+	for(i=0; i<256; i+=4) {
+		if(rpcBestCU->getCULeft() != NULL) {
+			sum += (double) ((rpcBestCU->getCULeft())->getDepth(i));
+			j++;
+		}
+	}
+	if(j>0)
+		med_Left = sum/j;
+
+	i = j = sum = 0;
+	for(i=0; i<256; i+=4) {
+		if(rpcBestCU->getCUColocated(REF_PIC_LIST_0) != NULL) {
+			sum += (double) ((rpcBestCU->getCUColocated(REF_PIC_LIST_0))->getDepth(i));
+			j++;
+		}
+	}
+	if(j>0)
+		med_Colocated1 = sum/j;
+	
+	i = j = sum = 0;
+	for(i=0; i<256; i+=4) {
+		if(rpcBestCU->getCUColocated(REF_PIC_LIST_1) != NULL) {
+			sum += (double) ((rpcBestCU->getCUColocated(REF_PIC_LIST_1))->getDepth(i));
+			j++;
+		}
+	}
+	if(j>0)
+		med_Colocated2 = sum/j;
+	
+	j = 0;
+	if(med_Above != -1) {
+		sum_med += med_Above;
+		j++;
+	}
+	if(med_AboveLeft != -1) {
+		sum_med += med_AboveLeft;
+		j++;
+	}
+	if(med_AboveRight != -1) {
+		sum_med += med_AboveRight;
+		j++;
+	}
+	if(med_Left != -1) {
+		sum_med += med_Left;
+		j++;
+	}
+	if(med_Colocated1 != -1) {
+		sum_med += med_Colocated1;
+		j++;
+	}
+	if(med_Colocated2 != -1) {
+		sum_med += med_Colocated2;
+		j++;
+	}
+
+	if(j>0) {
+		med_med = sum_med/j;
+		diff_NeiDepth = med_med - uiDepth;
+	}
+	else {
+		med_med = -1;
+		diff_NeiDepth = 0;
+	}
+
+
+	//////// DECISION TREES FOR CU-SPLITTING EARLY-TERMINATION
+
+	if(uiDepth == 0) {		// in 64x64 CUs
+
+		if(diff_NeiDepth <= 0.475) {
+			if(part == 0) {
+				split = 0;
+			}
+			else {		// i.e., if(part > 0)
+				split = 1;
+			}
+		}
+		else {		// i.e., if(diff_NeiDepth > 0.475)
+			if(part == 0) {
+				if(a2DIVa1 <= 1.461579) {
+					split = 1;
+				}
+				else {		// i.e., if(a2DIVa1 > 1.461579)
+					if(SKIPMergeFlag == 0) {
+						if(MergeFlag == 0) {
+							split = 0;
+						}
+						else {		// i.e., if(MergeFlag == 1)
+							split = 1;
+						}
+					}
+					else {		// i.e., if(SKIPMergeFlag == 1)
+						split = 0;
+					}
+				}
+			}
+			else {		// i.e., if(part > 0)
+				split = 1;
+			}
+		}
+
+	}		// END if(uiDepth == 0)
+
+	else if(uiDepth == 1) {		// in 32x32 CUs
+
+		if(diff_NeiDepth <= -0.546875) {
+			if(part == 0) {
+				split = 0;
+			}
+			else {		// i.e., if(part > 0)
+				split = 1;
+			}
+		}
+		else {		// i.e., if(diff_NeiDepth > -0.546875)
+			if(part == 0) {
+				if(a2DIVa1 <= 1.634299) {
+					if(RDcost_MSM <= 6453) {
+						if(diff_NeiDepth <= 0.114583) {
+							split = 0;
+						}
+						else {		// i.e., if(diff_NeiDepth > 0.114583)
+							if(a2DIVa1 <= 1.243904) {
+								split = 1;
+							}
+							else {		// i.e., if(a2DIVa1 > 1.243904) 
+								if(SKIPMergeFlag == 0) {
+									split = 1;
+								}
+								else {		// i.e., if(SKIPMergeFlag == 1)
+									split = 0;
+								}
+							}
+						}
+					}		// i.e., if(RDcost_MSM > 6453)
+					else {
+						if(RDcost_MSM <= 19209) {
+							if(SKIPMergeFlag == 0) {
+								if(diff_NeiDepth <= 0) {
+									split = 0;
+								}
+								else {		// i.e., if(diff_NeiDepth > 0) 
+									split = 1;
+								}
+							}
+							else {		// i.e., if(SKIPMergeFlag == 1) 
+								split = 1;
+							}
+						}
+						else {		// i.e., if(RDcost_MSM > 19209) 
+							split = 1;
+						}
+					}
+				}
+				else {		// i.e., if(a2DIVa1 > 1.634299)
+					if(SKIPMergeFlag == 0) {
+						if(MergeFlag == 0) {
+							if(diff_NeiDepth <= -0.145833) {
+								split = 0;
+							}
+							else {		//i.e., if(diff_NeiDepth > -0.145833)
+								if(RDcost_Nx2N <= 5053) {
+									split = 0;
+								}
+								else {		// i.e., if(RDcost_Nx2N > 5053)
+									if(RDcost_2Nx2N <= 11692) {
+										split = 1;
+									}
+									else {		// i.e., if(RDcost_2Nx2N > 11692)
+										split = 0;
+									}
+								}
+							}
+						}
+						else {		// i.e., if(MergeFlag == 1)
+							split = 1;
+						}
+					}
+					else {		// i.e., if(SKIPMergeFlag == 1)
+						if(RDcost_MSM <= 4354) {
+							split = 0;
+						}
+						else {		// i.e., (RDcost_MSM > 4354)
+							if(a2DIVa1 <= 2.360142) {
+								if(diff_NeiDepth <= -0.145833) {
+									split = 0;
+								}
+								else {		// i.e., if(diff_NeiDepth > -0.145833)
+									if(RDcost_MSM <= 15947) {
+										split = 0;
+									}
+									else {		// i.e., if(RDcost_MSM > 15947)
+										split = 1;
+									}
+								}
+							}
+							else {		// i.e., if(a2DIVa1 > 2.360142)
+								split = 0;
+							}
+						}
+					}
+				}
+			}
+			else {		// i.e., if(part > 0)
+				split = 1;
+			}
+		}
+	}		// END if(uiDepth == 1)
+
+	else if(uiDepth == 2) {		// in 16x16 CUs
+
+		if(diff_NeiDepth <= -1.48438) {
+			if(part == 0) {
+				if(ABSa2DIVa1 <= 0.950327) {
+					if(a2DIVa1 <= 1.420318) {
+						if(RDcost_MSM <= 11134) {
+							split = 0;
+						}
+						else {		// i.e., if(RDcost_MSM > 11134)
+							split = 1;
+						}
+					}
+					else {		// i.e., if(a2DIVa1 > 1.420318)
+						split = 0;
+					}
+				}
+				else {		// i.e., if(ABSa2DIVa1 > 0.950327)
+					split = 0;
+				}
+			}
+			else {		// i.e., if(part > 0)
+				split = 1;
+			}
+		}
+		else {		// i.e., if(diff_NeiDepth > -1.48438)
+			if(a2DIVa1 <= 1.832502) {
+				if(part == 0) {
+					if(RDcost_MSM <= 11926) {
+						if(a2DIVa1 <= 1.332925) {
+							if(diff_NeiDepth <= -0.7875) {
+								if(SKIPMergeFlag == 0) {
+									if(MergeFlag == 0) {
+										split = 1;
+									}
+									else {		// i.e., if(MergeFlag == 1)
+										split = 0;
+									}
+								}
+								else {		// i.e., if(SKIPMergeFlag == 1)
+									split = 1;
+								}
+							}
+							else {		// i.e., if(diff_NeiDepth > -0.7875)
+								split = 1;
+							}
+						}
+						else {		// i.e., if(a2DIVa1 > 1.332925)
+							if(RDcost_2NxN <= 7641) {
+								if(SKIPMergeFlag == 0) {
+									split = 1;
+								}
+								else {		// i.e., if(SKIPMergeFlag == 1)
+									split = 0;
+								}
+							}
+							else {		// i.e., if(RDcost_2NxN > 7641)
+								if(diff_NeiDepth <= -0.875) {
+									if(RDcost_2Nx2N <= 13768) {
+										split = 1;
+									}
+									else {		// i.e., if(RDcost_2Nx2N > 13768)
+										split = 0;
+									}
+								}
+								else {		// i.e., if(diff_NeiDepth > -0.875)
+									split = 1;
+								}
+							}
+						}
+					}
+					else {		// i.e., if(RDcost_MSM > 11926)
+						split = 1;
+					}
+				}
+				else {		// i.e., if(part > 0)
+					split = 1;
+				}
+			}
+			else {		// i.e., if(a2DIVa1 > 1.832502)
+				if(part == 0) {
+					if(SKIPMergeFlag == 0) {
+						split = 1;
+					}
+					else {		// i.e., if(SKIPMergeFlag == 1)
+						if(RDcost_MSM <= 11882) {
+							if(RDcost_MSM <= 66) {
+								split = 1;
+							}
+							else {		// i.e., if(RDcost_MSM > 66)
+								 if(ABSa2DIVa1 <= 1.955319) {
+									 if(RDcost_Nx2N <= 5206) {
+										 split = 0;
+									 }
+									 else {		// i.e., if(RDcost_Nx2N > 5206)
+										 if(diff_NeiDepth <= -1.10938) {
+											 split = 0;
+										 }
+										 else {		// i.e., if(diff_NeiDepth > -1.10938)
+											 if(RDcost_Nx2N <= 16704) {
+												 split = 0;
+											 }
+											 else {		// i.e., if(RDcost_Nx2N > 16704)
+												 split = 1;
+											 }
+										 }
+									 }
+								 }
+								 else {		// i.e., if(ABSa2DIVa1 > 1.955319)
+									 split = 0;
+								 }
+							}
+						}
+						else {		// i.e., if(RDcost_MSM > 11882)
+							if(RDcost_2NxN <= 46509) {
+								split = 0;
+							}
+							else {		// i.e., if(RDcost_2NxN > 46509)
+								if(ABSa2DIVa1 <= 1.945848) {
+									split = 1;
+								}
+								else {		// i.e., if(ABSa2DIVa1 > 1.945848)
+									split = 0;
+								}
+							}
+						}
+					}
+				}
+				else {		// i.e., if(part > 0)
+					split = 1;
+				}
+			}
+		}
+
+	}		// END if(uiDepth == 2)
+
+  }
+  //gcorrea: 03/03/2014 END
+ 
   for (Int iQP=iMinQP; iQP<=iMaxQP; iQP++)
   {
     if (isAddLowestQP && (iQP == iMinQP))
@@ -756,7 +1196,11 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
     }
     rpcTempCU->initEstData( uiDepth, iQP );
 
-    // further split
+    // further split	
+
+   // gcorrea: 04/03/2014
+   if(split == 1) {
+   // gcorrea: 04/03/2014 END
     if( bSubBranch && uiDepth < g_uiMaxCUDepth - g_uiAddCUDepth )
     {
       UChar       uhNextDepth         = uiDepth+1;
@@ -878,6 +1322,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
       }
       xCheckBestMode( rpcBestCU, rpcTempCU, uiDepth);                                  // RD compare current larger prediction
     }                                                                                  // with sub partitioned prediction.
+   }		// gcorrea: 04/03/2014 -- END if(split == 1)
     if (isAddLowestQP && (iQP == lowestQP))
     {
       iQP = iMinQP;
@@ -887,6 +1332,7 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
   rpcBestCU->copyToPic(uiDepth);                                                     // Copy Best data to Picture for next partition prediction.
 
   xCopyYuv2Pic( rpcBestCU->getPic(), rpcBestCU->getAddr(), rpcBestCU->getZorderIdxInCU(), uiDepth, uiDepth, rpcBestCU, uiLPelX, uiTPelY );   // Copy Yuv data to picture Yuv
+
   if( bBoundary ||(bSliceEnd && bInsidePicture))
   {
     return;
@@ -1398,6 +1844,26 @@ Void TEncCu::xCheckRDCostInter( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, 
   rpcTempCU->getTotalCost()  = m_pcRdCost->calcRdCost( rpcTempCU->getTotalBits(), rpcTempCU->getTotalDistortion() );
 
   xCheckDQP( rpcTempCU );
+
+  //gcorrea 01/11/2013
+  if(ePartSize==SIZE_2Nx2N)
+	  RDcost_2Nx2N = rpcTempCU->getTotalCost();
+  else if(ePartSize==SIZE_2NxN)
+	  RDcost_2NxN = rpcTempCU->getTotalCost();
+  else if(ePartSize==SIZE_Nx2N)
+	  RDcost_Nx2N = rpcTempCU->getTotalCost();
+  else if(ePartSize==SIZE_NxN)
+	  RDcost_NxN = rpcTempCU->getTotalCost();
+  else if(ePartSize==SIZE_2NxnU)
+	  RDcost_2NxnU = rpcTempCU->getTotalCost();
+  else if(ePartSize==SIZE_2NxnD)
+	  RDcost_2NxnD = rpcTempCU->getTotalCost();
+  else if(ePartSize==SIZE_nLx2N)
+	  RDcost_nLx2N = rpcTempCU->getTotalCost();
+  else if(ePartSize==SIZE_nRx2N)
+	  RDcost_nRx2N = rpcTempCU->getTotalCost();
+  //gcorrea 01/11/2013 ENDs
+
   xCheckBestMode(rpcBestCU, rpcTempCU, uhDepth);
 }
 

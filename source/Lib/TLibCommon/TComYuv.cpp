@@ -35,15 +35,17 @@
     \brief    general YUV buffer class
     \todo     this should be merged with TComPicYuv
 */
-
 #include <stdlib.h>
 #include <memory.h>
 #include <assert.h>
 #include <math.h>
+#include <stdio.h>
 
 #include "CommonDef.h"
 #include "TComYuv.h"
 #include "TComInterpolationFilter.h"
+
+using namespace std;
 
 //! \ingroup TLibCommon
 //! \{
@@ -475,16 +477,18 @@ Void TComYuv::subtractLuma( TComYuv* pcYuvSrc0, TComYuv* pcYuvSrc1, UInt uiTrUni
   Int  iSrc0Stride = pcYuvSrc0->getStride();
   Int  iSrc1Stride = pcYuvSrc1->getStride();
   Int  iDstStride  = getStride();
-  for ( y = uiPartSize-1; y >= 0; y-- )
-  {
-    for ( x = uiPartSize-1; x >= 0; x-- )
-    {
-      pDst[x] = pSrc0[x] - pSrc1[x];
-    }
-    pSrc0 += iSrc0Stride;
-    pSrc1 += iSrc1Stride;
-    pDst  += iDstStride;
-  }
+
+  
+	  for ( y = uiPartSize-1; y >= 0; y-- )
+	  {
+		for ( x = uiPartSize-1; x >= 0; x-- )
+		{
+		  pDst[x] = pSrc0[x] - pSrc1[x];
+		}
+		pSrc0 += iSrc0Stride;
+		pSrc1 += iSrc1Stride;
+		pDst  += iDstStride;
+	  }
 }
 
 Void TComYuv::subtractChroma( TComYuv* pcYuvSrc0, TComYuv* pcYuvSrc1, UInt uiTrUnitIdx, UInt uiPartSize )

@@ -43,6 +43,12 @@
 using namespace std;
 namespace po = df::program_options_lite;
 
+//gcorrea 04/03/2014
+int saveResData2Nx2N;
+double RDcost_MSM, RDcost_2Nx2N, RDcost_2NxN, RDcost_Nx2N, RDcost_NxN, RDcost_2NxnU, RDcost_2NxnD, RDcost_nLx2N, RDcost_nRx2N;
+//gcorrea 04/03/2014 END
+
+
 //! \ingroup TAppEncoder
 //! \{
 
