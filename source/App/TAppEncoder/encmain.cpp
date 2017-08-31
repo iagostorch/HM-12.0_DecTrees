@@ -43,6 +43,26 @@
 using namespace std;
 namespace po = df::program_options_lite;
 
+//gcorrea 23/01/2014
+double RDcost_MSM, RDcost_2Nx2N, RDcost_2NxN, RDcost_Nx2N, RDcost_NxN, RDcost_2NxnU, RDcost_2NxnD, RDcost_nLx2N, RDcost_nRx2N;
+
+int frameWidth, frameHeight;
+int nCU_hor, nCU_ver, nCU32x32_hor, nCU32x32_ver, nCU16x16_hor, nCU16x16_ver, nCU8x8_hor, nCU8x8_ver, nCU;
+
+int count_all_LCU, count_all_CU32x32, count_all_CU16x16, count_all_CU8x8;
+int count_LCU, count_CU32x32, count_CU16x16, count_CU8x8;
+int count_frame;
+
+double sum_cost2Nx2N_64x64, sum_cost2Nx2N_32x32, sum_cost2Nx2N_16x16, sum_cost2Nx2N_8x8;
+double sum_costSKIP_64x64, sum_costSKIP_32x32, sum_costSKIP_16x16, sum_costSKIP_8x8;
+double sum_bestCost_64x64, sum_bestCost_32x32, sum_bestCost_16x16, sum_bestCost_8x8;
+
+double med_cost2Nx2N_64x64, med_cost2Nx2N_32x32, med_cost2Nx2N_16x16, med_cost2Nx2N_8x8;
+double med_costSKIP_64x64, med_costSKIP_32x32, med_costSKIP_16x16, med_costSKIP_8x8;
+double med_bestCost_64x64, med_bestCost_32x32, med_bestCost_16x16, med_bestCost_8x8;
+//gcorrea 23/01/2014 END
+
+
 //! \ingroup TAppEncoder
 //! \{
 

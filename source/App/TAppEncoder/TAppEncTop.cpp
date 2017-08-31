@@ -47,6 +47,26 @@
 
 using namespace std;
 
+//gcorrea 23/01/2014
+extern double RDcost_MSM, RDcost_2Nx2N, RDcost_2NxN, RDcost_Nx2N, RDcost_NxN, RDcost_2NxnU, RDcost_2NxnD, RDcost_nLx2N, RDcost_nRx2N;
+
+extern int frameWidth, frameHeight;
+extern int nCU_hor, nCU_ver, nCU32x32_hor, nCU32x32_ver, nCU16x16_hor, nCU16x16_ver, nCU8x8_hor, nCU8x8_ver, nCU;
+
+extern int count_all_LCU, count_all_CU32x32, count_all_CU16x16, count_all_CU8x8;
+extern int count_LCU, count_CU32x32, count_CU16x16, count_CU8x8;
+extern int count_frame;
+
+extern double sum_cost2Nx2N_64x64, sum_cost2Nx2N_32x32, sum_cost2Nx2N_16x16, sum_cost2Nx2N_8x8;
+extern double sum_costSKIP_64x64, sum_costSKIP_32x32, sum_costSKIP_16x16, sum_costSKIP_8x8;
+extern double sum_bestCost_64x64, sum_bestCost_32x32, sum_bestCost_16x16, sum_bestCost_8x8;
+
+extern double med_cost2Nx2N_64x64, med_cost2Nx2N_32x32, med_cost2Nx2N_16x16, med_cost2Nx2N_8x8;
+extern double med_costSKIP_64x64, med_costSKIP_32x32, med_costSKIP_16x16, med_costSKIP_8x8;
+extern double med_bestCost_64x64, med_bestCost_32x32, med_bestCost_16x16, med_bestCost_8x8;
+//gcorrea 23/01/2014 END
+
+
 //! \ingroup TAppEncoder
 //! \{
 
@@ -405,6 +425,45 @@ Void TAppEncTop::encode()
   {
     pcPicYuvOrg->create( m_iSourceWidth, m_iSourceHeight, m_uiMaxCUWidth, m_uiMaxCUHeight, m_uiMaxCUDepth );
   }
+
+
+	//gcorrea 03/10/2013
+	nCU_hor = ceil((float)m_iSourceWidth/64);			// number of CUs in a horizontal line
+	nCU_ver = ceil((float)m_iSourceHeight/64);		// number of CUs in a vertical column
+
+	int new_SourceWidth = nCU_hor*64;
+	int new_SourceHeight = nCU_ver*64;
+
+	nCU32x32_hor = ceil((float)m_iSourceWidth/32);			// number of CUs in a horizontal line
+	nCU32x32_ver = ceil((float)m_iSourceHeight/32);		// number of CUs in a vertical column
+
+	nCU16x16_hor = ceil((float)m_iSourceWidth/16);			// number of CUs in a horizontal line
+	nCU16x16_ver = ceil((float)m_iSourceHeight/16);		// number of CUs in a vertical column
+
+	nCU8x8_hor = ceil((float)m_iSourceWidth/8);			// number of CUs in a horizontal line
+	nCU8x8_ver = ceil((float)m_iSourceHeight/8);		// number of CUs in a vertical column
+
+	nCU = nCU_ver * nCU_hor;
+
+	int CTB_width = m_uiMaxCUWidth;
+	int CTB_height = m_uiMaxCUHeight;
+
+	frameWidth = nCU_hor * CTB_width;
+	frameHeight = nCU_ver * CTB_height;
+
+	sum_cost2Nx2N_64x64 = sum_cost2Nx2N_32x32 = sum_cost2Nx2N_16x16 = sum_cost2Nx2N_8x8 = 0;
+	sum_costSKIP_64x64 = sum_costSKIP_32x32 = sum_costSKIP_16x16 = sum_costSKIP_8x8 = 0;
+	sum_bestCost_64x64 = sum_bestCost_32x32 = sum_bestCost_16x16 = sum_bestCost_8x8 = 0;
+
+	med_cost2Nx2N_64x64 = med_cost2Nx2N_32x32 = med_cost2Nx2N_16x16 = med_cost2Nx2N_8x8 = 0;
+	med_costSKIP_64x64 = med_costSKIP_32x32 = med_costSKIP_16x16 = med_costSKIP_8x8 = 0;
+	med_bestCost_64x64 = med_bestCost_32x32 = med_bestCost_16x16 = med_bestCost_8x8 = 0;
+
+	count_LCU = count_CU32x32 = count_CU16x16 = count_CU8x8 = count_frame = 0;
+	count_all_LCU = count_all_CU32x32 = count_all_CU16x16 = count_all_CU8x8 = 0;
+	//gcorrea 03/10/2013 END
+
+
   
   while ( !bEos )
   {
@@ -413,7 +472,7 @@ Void TAppEncTop::encode()
 
     // read input YUV file
     m_cTVideoIOYuvInputFile.read( pcPicYuvOrg, m_aiPad );
-    
+
     // increase number of received frames
     m_iFrameRcvd++;
     
