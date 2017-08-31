@@ -41,6 +41,18 @@
 #include "TEncSearch.h"
 #include <math.h>
 
+//gcorrea 10/03/2014
+#include "TEncTop.h"
+
+using namespace std;
+
+extern ofstream CU32x32data;
+extern ofstream CU16x16data;
+extern char filename_32x32[100];
+extern char filename_16x16[100];
+
+//gcorrea 10/03/2014 END
+
 //! \ingroup TLibEncoder
 //! \{
 
@@ -4655,7 +4667,7 @@ Void TEncSearch::encodeResAndCalcRdInterCU( TComDataCU* pcCU, TComYuv* pcYuvOrg,
   pcCU->getTotalBits()       = uiBitsBest;
   pcCU->getTotalDistortion() = uiDistortionBest;
   pcCU->getTotalCost()       = dCostBest;
-  
+ 
   if ( pcCU->isSkipped(0) )
   {
     pcCU->setCbfSubParts( 0, 0, 0, 0, pcCU->getDepth( 0 ) );
@@ -4706,6 +4718,12 @@ Void TEncSearch::xEstimateResidualQT( TComDataCU* pcCU, UInt uiQuadrant, UInt ui
     m_pcRDGoOnSbacCoder->store( m_pppcRDSbacCoder[ uiDepth ][ CI_QT_TRAFO_ROOT ] );
   }
   
+  // gcorrea: 10/03/2014
+  int upper_uiAbsSumY, upper_uiAbsSumU, upper_uiAbsSumV, upper_uiSetCbf, TUwidth, upper_nonZeroCoeffY, upper_nonZeroCoeffU, upper_nonZeroCoeffV;
+  upper_uiAbsSumY = upper_uiAbsSumU = upper_uiAbsSumV = upper_uiSetCbf = TUwidth = upper_nonZeroCoeffY = upper_nonZeroCoeffU = upper_nonZeroCoeffV = -1;
+  int TUsplit = 1;
+  // gcorrea: 10/03/2014 END
+
   if( bCheckFull )
   {
     const UInt uiNumCoeffPerAbsPartIdxIncrement = pcCU->getSlice()->getSPS()->getMaxCUWidth() * pcCU->getSlice()->getSPS()->getMaxCUHeight() >> ( pcCU->getSlice()->getSPS()->getMaxCUDepth() << 1 );
@@ -4751,7 +4769,7 @@ Void TEncSearch::xEstimateResidualQT( TComDataCU* pcCU, UInt uiQuadrant, UInt ui
 #if RDOQ_CHROMA_LAMBDA 
     m_pcTrQuant->selectLambda(TEXT_LUMA);  
 #endif
-    m_pcTrQuant->transformNxN( pcCU, pcResi->getLumaAddr( absTUPartIdx ), pcResi->getStride (), pcCoeffCurrY, 
+    m_pcTrQuant->transformNxN( pcCU, pcResi->getLumaAddr( absTUPartIdx ), pcResi->getStride (), pcCoeffCurrY,				///<<<<<<<<<<<<<<<<<------- transformada p/ Y
 #if ADAPTIVE_QP_SELECTION
                                  pcArlCoeffCurrY, 
 #endif      
@@ -4773,7 +4791,7 @@ Void TEncSearch::xEstimateResidualQT( TComDataCU* pcCU, UInt uiQuadrant, UInt ui
       m_pcTrQuant->selectLambda(TEXT_CHROMA); 
 #endif
 
-      m_pcTrQuant->transformNxN( pcCU, pcResi->getCbAddr(absTUPartIdxC), pcResi->getCStride(), pcCoeffCurrU, 
+      m_pcTrQuant->transformNxN( pcCU, pcResi->getCbAddr(absTUPartIdxC), pcResi->getCStride(), pcCoeffCurrU, 				///<<<<<<<<<<<<<<<<<------- transformada p/ Cb
 #if ADAPTIVE_QP_SELECTION
                                  pcArlCoeffCurrU, 
 #endif        
@@ -4781,7 +4799,7 @@ Void TEncSearch::xEstimateResidualQT( TComDataCU* pcCU, UInt uiQuadrant, UInt ui
 
       curChromaQpOffset = pcCU->getSlice()->getPPS()->getChromaCrQpOffset() + pcCU->getSlice()->getSliceQpDeltaCr();
       m_pcTrQuant->setQPforQuant( pcCU->getQP( 0 ), TEXT_CHROMA, pcCU->getSlice()->getSPS()->getQpBDOffsetC(), curChromaQpOffset );
-      m_pcTrQuant->transformNxN( pcCU, pcResi->getCrAddr(absTUPartIdxC), pcResi->getCStride(), pcCoeffCurrV, 
+      m_pcTrQuant->transformNxN( pcCU, pcResi->getCrAddr(absTUPartIdxC), pcResi->getCStride(), pcCoeffCurrV,  				///<<<<<<<<<<<<<<<<<------- transformada p/ Cr
 #if ADAPTIVE_QP_SELECTION
                                  pcArlCoeffCurrV, 
 #endif        
@@ -4797,8 +4815,8 @@ Void TEncSearch::xEstimateResidualQT( TComDataCU* pcCU, UInt uiQuadrant, UInt ui
       m_pcEntropyCoder->encodeQtCbf( pcCU, uiAbsPartIdx, TEXT_LUMA,     uiTrMode );
     }
     
-    m_pcEntropyCoder->encodeCoeffNxN( pcCU, pcCoeffCurrY, uiAbsPartIdx,  trWidth,  trHeight,    uiDepth, TEXT_LUMA );
-    const UInt uiSingleBitsY = m_pcEntropyCoder->getNumberOfWrittenBits();
+    m_pcEntropyCoder->encodeCoeffNxN( pcCU, pcCoeffCurrY, uiAbsPartIdx,  trWidth,  trHeight,    uiDepth, TEXT_LUMA );  				///<<<<<<<<<<<<<<<<<------- codif de entropia p/ Y
+    const UInt uiSingleBitsY = m_pcEntropyCoder->getNumberOfWrittenBits();  														///<<<<<<<<<<<<<<<<<------- getNumberOfWrittenBits
     
     UInt uiSingleBitsU = 0;
     UInt uiSingleBitsV = 0;
@@ -4807,14 +4825,14 @@ Void TEncSearch::xEstimateResidualQT( TComDataCU* pcCU, UInt uiQuadrant, UInt ui
       {
         m_pcEntropyCoder->encodeQtCbf   ( pcCU, uiAbsPartIdx, TEXT_CHROMA_U, uiTrMode );
       }
-      m_pcEntropyCoder->encodeCoeffNxN( pcCU, pcCoeffCurrU, uiAbsPartIdx, trWidthC, trHeightC, uiDepth, TEXT_CHROMA_U );
-      uiSingleBitsU = m_pcEntropyCoder->getNumberOfWrittenBits() - uiSingleBitsY;
+      m_pcEntropyCoder->encodeCoeffNxN( pcCU, pcCoeffCurrU, uiAbsPartIdx, trWidthC, trHeightC, uiDepth, TEXT_CHROMA_U ); 				///<<<<<<<<<<<<<<<<<------- codif de entropia p/ Cb
+      uiSingleBitsU = m_pcEntropyCoder->getNumberOfWrittenBits() - uiSingleBitsY;  														///<<<<<<<<<<<<<<<<<------- getNumberOfWrittenBits
       
       {
         m_pcEntropyCoder->encodeQtCbf   ( pcCU, uiAbsPartIdx, TEXT_CHROMA_V, uiTrMode );
       }
-      m_pcEntropyCoder->encodeCoeffNxN( pcCU, pcCoeffCurrV, uiAbsPartIdx, trWidthC, trHeightC, uiDepth, TEXT_CHROMA_V );
-      uiSingleBitsV = m_pcEntropyCoder->getNumberOfWrittenBits() - ( uiSingleBitsY + uiSingleBitsU );
+      m_pcEntropyCoder->encodeCoeffNxN( pcCU, pcCoeffCurrV, uiAbsPartIdx, trWidthC, trHeightC, uiDepth, TEXT_CHROMA_V ); 				///<<<<<<<<<<<<<<<<<------- codif de entropia p/ Cr
+      uiSingleBitsV = m_pcEntropyCoder->getNumberOfWrittenBits() - ( uiSingleBitsY + uiSingleBitsU );  									///<<<<<<<<<<<<<<<<<------- getNumberOfWrittenBits
     }
     
     const UInt uiNumSamplesLuma = 1 << (uiLog2TrSize<<1);
@@ -4828,6 +4846,7 @@ Void TEncSearch::xEstimateResidualQT( TComDataCU* pcCU, UInt uiQuadrant, UInt ui
     {
       *puiZeroDist += uiDistY;
     }
+
     if( uiAbsSumY )
     {
       Pel *pcResiCurrY = m_pcQTTempTComYuv[ uiQTTempAccessLayer ].getLumaAddr( absTUPartIdx );
@@ -5330,81 +5349,305 @@ Void TEncSearch::xEstimateResidualQT( TComDataCU* pcCU, UInt uiQuadrant, UInt ui
 
     uiSingleDist = uiDistY + uiDistU + uiDistV;
     dSingleCost = m_pcRdCost->calcRdCost( uiSingleBits, uiSingleDist );
-  }  
-  
-  // code sub-blocks
-  if( bCheckSplit )
-  {
-    if( m_bUseSBACRD && bCheckFull )
-    {
-      m_pcRDGoOnSbacCoder->store( m_pppcRDSbacCoder[ uiDepth ][ CI_QT_TRAFO_TEST ] );
-      m_pcRDGoOnSbacCoder->load ( m_pppcRDSbacCoder[ uiDepth ][ CI_QT_TRAFO_ROOT ] );
-    }
-    UInt uiSubdivDist = 0;
-    UInt uiSubdivBits = 0;
-    Double dSubdivCost = 0.0;
+
+	// gcorrea: 10/03/2014
+	upper_nonZeroCoeffY = (int) m_pcEntropyCoder->countNonZeroCoeffs(pcCoeffCurrY, trWidth * trHeight );
+	upper_nonZeroCoeffU = (int) m_pcEntropyCoder->countNonZeroCoeffs(pcCoeffCurrY, trWidthC * trHeightC );
+	upper_nonZeroCoeffV = (int) m_pcEntropyCoder->countNonZeroCoeffs(pcCoeffCurrY, trWidthC * trHeightC );
+	upper_uiAbsSumY = (int) uiAbsSumY;
+	upper_uiAbsSumU = (int) uiAbsSumU;
+	upper_uiAbsSumV = (int) uiAbsSumV;
+	upper_uiSetCbf = (int) uiSetCbf;
+
+	TUwidth = trWidth;
+	//gcorrea: 10/03/2014 END
+	
+	// gcorrea: 14/03/2014
+
+	// early-termination trees for splitting 32x32 TUs
+	if(TUwidth == 32) {
+
+		if(upper_nonZeroCoeffY <= 1) {
+			if(upper_uiAbsSumV <= 0) {
+				if(dSingleCost <= 175279) {
+					TUsplit = 0;
+				}
+				else {
+					if(dSingleCost <= 455504) {
+						TUsplit = 0;
+					}
+					else {
+						TUsplit = 1;
+					}
+				}
+			}
+			else {
+				TUsplit = 1;
+			}
+		}
+		else {
+			if(dSingleCost <= 144752) {
+				if(upper_uiAbsSumY <= 41) {
+					TUsplit = 1;
+				}
+				else {
+					if(upper_nonZeroCoeffU <= 110) {
+						if(upper_nonZeroCoeffY <= 120) {
+							if(upper_nonZeroCoeffY <= 15) {
+								TUsplit = 0;
+							}
+							else {
+								if(upper_nonZeroCoeffU <= 37) {
+									if(dSingleCost <= 85457) {
+										TUsplit = 1;
+									}
+									else {
+										if(dSingleCost <= 116284) {
+											if(upper_nonZeroCoeffY <= 50) {
+												TUsplit = 1;
+											}
+											else {
+												TUsplit = 0;
+											}
+										}
+										else {
+											TUsplit = 1;
+										}
+									}
+								}
+								else {
+									TUsplit = 1;
+								}
+							}
+						}
+						else {
+							if(dSingleCost <= 77311) {
+								if(upper_uiAbsSumU <= 1) {
+									TUsplit = 0;
+								}
+								else {
+									TUsplit = 1;
+								}
+							}
+							else {
+								TUsplit = 1;
+							}
+						}
+					}
+					else {
+						TUsplit = 1;
+					}
+				}
+			}
+			else {
+				TUsplit = 1;
+			}
+		}
+
+	} // end if(TUwidth == 32)
+
+
+	// early-termination trees for splitting 16x16 TUs
+	if(TUwidth == 16) {
+
+		if(upper_nonZeroCoeffY <= 0) {
+			if(dSingleCost <= 56003) {
+				if(upper_uiAbsSumV <= 0) {
+					if(upper_uiAbsSumU <= 0) {
+						TUsplit = 0;
+					}
+					else {
+						TUsplit = 1;
+					}
+				}
+				else {
+					TUsplit = 1;
+				}
+			}
+			else {
+				if(dSingleCost <= 86649) {
+					TUsplit = 0;
+				}
+				else {
+					if(dSingleCost <= 117625) {
+						if(upper_uiSetCbf <= 1) {
+							TUsplit = 0;
+						}
+						else {
+							TUsplit = 1;
+						}
+					}
+					else {
+						TUsplit = 1;
+					}
+				}
+			}
+		}
+		else {
+			if(upper_nonZeroCoeffY <= 1) {
+				if(dSingleCost <= 17936) {
+					if(upper_uiAbsSumY <= 1) {
+						if(dSingleCost <= 6602) {
+							TUsplit = 0;
+						}
+						else {
+							TUsplit = 1;
+						}
+					}
+					else {
+						TUsplit = 0;
+					}
+				}
+				else {
+					TUsplit = 1;
+				}
+			}
+			else {
+				if(upper_nonZeroCoeffU <= 32) {
+					if(upper_uiAbsSumY <= 29) {
+						TUsplit = 1;
+					}
+					else {
+						if(upper_nonZeroCoeffY <= 28) {
+							TUsplit = 1;
+						}
+						else {
+							if(upper_uiAbsSumY <= 81) {
+								if(dSingleCost <= 12192) {
+									TUsplit = 1;
+								}
+								else {
+									if(dSingleCost <= 17878) {
+										TUsplit = 0;
+									}
+									else {
+										TUsplit = 1;
+									}
+								}
+							}
+							else {
+								TUsplit = 1;
+							}
+						}
+					}
+				}
+				else {
+					TUsplit = 1;
+				}
+			}
+		}
+
+	} // end if(TUwidth == 16)
+
+	//gcorrea: 14/03/2014 END
+
+  }  // end if(bCheckFull)
+
+
+  //gcorrea: 14/03/2014
+  if(TUsplit == 1) {
+
+	  // code sub-blocks
+	  if( bCheckSplit )
+	  {
+		if( m_bUseSBACRD && bCheckFull )
+		{
+		  m_pcRDGoOnSbacCoder->store( m_pppcRDSbacCoder[ uiDepth ][ CI_QT_TRAFO_TEST ] );
+		  m_pcRDGoOnSbacCoder->load ( m_pppcRDSbacCoder[ uiDepth ][ CI_QT_TRAFO_ROOT ] );
+		}
+		UInt uiSubdivDist = 0;
+		UInt uiSubdivBits = 0;
+		Double dSubdivCost = 0.0;
     
-    const UInt uiQPartNumSubdiv = pcCU->getPic()->getNumPartInCU() >> ((uiDepth + 1 ) << 1);
-    for( UInt ui = 0; ui < 4; ++ui )
-    {
-      UInt nsAddr = uiAbsPartIdx + ui * uiQPartNumSubdiv;
-      xEstimateResidualQT( pcCU, ui, uiAbsPartIdx + ui * uiQPartNumSubdiv, nsAddr, pcResi, uiDepth + 1, dSubdivCost, uiSubdivBits, uiSubdivDist, bCheckFull ? NULL : puiZeroDist );
-    }
+		const UInt uiQPartNumSubdiv = pcCU->getPic()->getNumPartInCU() >> ((uiDepth + 1 ) << 1);
+		for( UInt ui = 0; ui < 4; ++ui )
+		{
+		  UInt nsAddr = uiAbsPartIdx + ui * uiQPartNumSubdiv;
+		  xEstimateResidualQT( pcCU, ui, uiAbsPartIdx + ui * uiQPartNumSubdiv, nsAddr, pcResi, uiDepth + 1, dSubdivCost, uiSubdivBits, uiSubdivDist, bCheckFull ? NULL : puiZeroDist );
+		}
     
-    UInt uiYCbf = 0;
-    UInt uiUCbf = 0;
-    UInt uiVCbf = 0;
-    for( UInt ui = 0; ui < 4; ++ui )
-    {
-      uiYCbf |= pcCU->getCbf( uiAbsPartIdx + ui * uiQPartNumSubdiv, TEXT_LUMA,     uiTrMode + 1 );
-      uiUCbf |= pcCU->getCbf( uiAbsPartIdx + ui * uiQPartNumSubdiv, TEXT_CHROMA_U, uiTrMode + 1 );
-      uiVCbf |= pcCU->getCbf( uiAbsPartIdx + ui * uiQPartNumSubdiv, TEXT_CHROMA_V, uiTrMode + 1 );
-    }
-    for( UInt ui = 0; ui < 4 * uiQPartNumSubdiv; ++ui )
-    {
-      pcCU->getCbf( TEXT_LUMA     )[uiAbsPartIdx + ui] |= uiYCbf << uiTrMode;
-      pcCU->getCbf( TEXT_CHROMA_U )[uiAbsPartIdx + ui] |= uiUCbf << uiTrMode;
-      pcCU->getCbf( TEXT_CHROMA_V )[uiAbsPartIdx + ui] |= uiVCbf << uiTrMode;
-    }
+		UInt uiYCbf = 0;
+		UInt uiUCbf = 0;
+		UInt uiVCbf = 0;
+		for( UInt ui = 0; ui < 4; ++ui )
+		{
+		  uiYCbf |= pcCU->getCbf( uiAbsPartIdx + ui * uiQPartNumSubdiv, TEXT_LUMA,     uiTrMode + 1 );
+		  uiUCbf |= pcCU->getCbf( uiAbsPartIdx + ui * uiQPartNumSubdiv, TEXT_CHROMA_U, uiTrMode + 1 );
+		  uiVCbf |= pcCU->getCbf( uiAbsPartIdx + ui * uiQPartNumSubdiv, TEXT_CHROMA_V, uiTrMode + 1 );
+		}
+		for( UInt ui = 0; ui < 4 * uiQPartNumSubdiv; ++ui )
+		{
+		  pcCU->getCbf( TEXT_LUMA     )[uiAbsPartIdx + ui] |= uiYCbf << uiTrMode;
+		  pcCU->getCbf( TEXT_CHROMA_U )[uiAbsPartIdx + ui] |= uiUCbf << uiTrMode;
+		  pcCU->getCbf( TEXT_CHROMA_V )[uiAbsPartIdx + ui] |= uiVCbf << uiTrMode;
+		}
     
-    if( m_bUseSBACRD )
-    {
-      m_pcRDGoOnSbacCoder->load( m_pppcRDSbacCoder[ uiDepth ][ CI_QT_TRAFO_ROOT ] );
-    }
-    m_pcEntropyCoder->resetBits();
+		if( m_bUseSBACRD )
+		{
+		  m_pcRDGoOnSbacCoder->load( m_pppcRDSbacCoder[ uiDepth ][ CI_QT_TRAFO_ROOT ] );
+		}
+		m_pcEntropyCoder->resetBits();
     
-    {
-      xEncodeResidualQT( pcCU, uiAbsPartIdx, uiDepth, true,  TEXT_LUMA );
-      xEncodeResidualQT( pcCU, uiAbsPartIdx, uiDepth, false, TEXT_LUMA );
-      xEncodeResidualQT( pcCU, uiAbsPartIdx, uiDepth, false, TEXT_CHROMA_U );
-      xEncodeResidualQT( pcCU, uiAbsPartIdx, uiDepth, false, TEXT_CHROMA_V );
-    }
+		{
+		  xEncodeResidualQT( pcCU, uiAbsPartIdx, uiDepth, true,  TEXT_LUMA );
+		  xEncodeResidualQT( pcCU, uiAbsPartIdx, uiDepth, false, TEXT_LUMA );
+		  xEncodeResidualQT( pcCU, uiAbsPartIdx, uiDepth, false, TEXT_CHROMA_U );
+		  xEncodeResidualQT( pcCU, uiAbsPartIdx, uiDepth, false, TEXT_CHROMA_V );
+		}
     
-    uiSubdivBits = m_pcEntropyCoder->getNumberOfWrittenBits();
-    dSubdivCost  = m_pcRdCost->calcRdCost( uiSubdivBits, uiSubdivDist );
-    
-    if( uiYCbf || uiUCbf || uiVCbf || !bCheckFull )
-    {
-      if( dSubdivCost < dSingleCost )
-      {
-        rdCost += dSubdivCost;
-        ruiBits += uiSubdivBits;
-        ruiDist += uiSubdivDist;
-        return;
-      }
-    }
-    pcCU->setTransformSkipSubParts ( uiBestTransformMode[0], TEXT_LUMA, uiAbsPartIdx, uiDepth ); 
-    if(bCodeChroma)
-    {
-      pcCU->setTransformSkipSubParts ( uiBestTransformMode[1], TEXT_CHROMA_U, uiAbsPartIdx, pcCU->getDepth(0)+uiTrModeC ); 
-      pcCU->setTransformSkipSubParts ( uiBestTransformMode[2], TEXT_CHROMA_V, uiAbsPartIdx, pcCU->getDepth(0)+uiTrModeC ); 
-    }
-    assert( bCheckFull );
-    if( m_bUseSBACRD )
-    {
-      m_pcRDGoOnSbacCoder->load( m_pppcRDSbacCoder[ uiDepth ][ CI_QT_TRAFO_TEST ] );
-    }
-  }
+		uiSubdivBits = m_pcEntropyCoder->getNumberOfWrittenBits();
+		dSubdivCost  = m_pcRdCost->calcRdCost( uiSubdivBits, uiSubdivDist );
+
+		  ////gcorrea: 10/03/2014
+		  //int subdiv;
+
+		  //if( dSubdivCost < dSingleCost )
+			 // subdiv = 1;
+		  //else
+			 // subdiv = 0;
+
+		  //if(TUwidth == 32) {
+			 //CU32x32data.open(filename_32x32, ios::out | ios::app);
+			 //if(CU32x32data.is_open()) {
+				// CU32x32data << (int) dSubdivCost << '\t' << (int) dSingleCost << '\t' << upper_uiAbsSumY << '\t' << upper_uiAbsSumU << '\t' << upper_uiAbsSumV << '\t' << upper_uiSetCbf << '\t' << upper_nonZeroCoeffY << '\t' << upper_nonZeroCoeffU << '\t' << upper_nonZeroCoeffV << '\t' << subdiv << endl;
+			 //}
+			 //CU32x32data.close();
+		  //}
+		  //else if(TUwidth == 16) {
+			 // CU16x16data.open(filename_16x16, ios::out | ios::app);
+			 // if(CU16x16data.is_open()) {
+				//  CU16x16data << (int) dSubdivCost << '\t' << (int) dSingleCost << '\t' << upper_uiAbsSumY << '\t' << upper_uiAbsSumU << '\t' << upper_uiAbsSumV << '\t' << upper_uiSetCbf << '\t' << upper_nonZeroCoeffY << '\t' << upper_nonZeroCoeffU << '\t' << upper_nonZeroCoeffV << '\t' << subdiv << endl;
+			 // }
+			 // CU16x16data.close();
+		  //}
+		  ////gcorrea: 10/03/2014 END
+
+		if( uiYCbf || uiUCbf || uiVCbf || !bCheckFull )
+		{
+		  if( dSubdivCost < dSingleCost )
+		  {
+			rdCost += dSubdivCost;
+			ruiBits += uiSubdivBits;
+			ruiDist += uiSubdivDist;
+			return;
+		  }
+		}
+		pcCU->setTransformSkipSubParts ( uiBestTransformMode[0], TEXT_LUMA, uiAbsPartIdx, uiDepth ); 
+		if(bCodeChroma)
+		{
+		  pcCU->setTransformSkipSubParts ( uiBestTransformMode[1], TEXT_CHROMA_U, uiAbsPartIdx, pcCU->getDepth(0)+uiTrModeC ); 
+		  pcCU->setTransformSkipSubParts ( uiBestTransformMode[2], TEXT_CHROMA_V, uiAbsPartIdx, pcCU->getDepth(0)+uiTrModeC ); 
+		}
+		assert( bCheckFull );
+		if( m_bUseSBACRD )
+		{
+		  m_pcRDGoOnSbacCoder->load( m_pppcRDSbacCoder[ uiDepth ][ CI_QT_TRAFO_TEST ] );
+		}
+	  }
+
+  }	// end   if(TUsplit == 1)
+  //gcorrea: 14/03/2014 END
+
   rdCost += dSingleCost;
   ruiBits += uiSingleBits;
   ruiDist += uiSingleDist;

@@ -39,6 +39,12 @@
 #include "TEncSlice.h"
 #include <math.h>
 
+//gcorrea: 17/10/2013
+//extern int count_frame;
+//extern int final_enc;
+//gcorrea: 17/10/2013 END
+
+
 //! \ingroup TLibEncoder
 //! \{
 
@@ -1278,6 +1284,12 @@ Void TEncSlice::compressSlice( TComPic*& rpcPic )
     m_pcRateCtrl->updateFrameData(m_uiPicTotalBits);
   }
 #endif
+
+
+	//gcorrea: 17/10/2013 END
+	//count_frame++;
+	//gcorrea: 17/10/2013 END
+
 }
 
 /**
@@ -1562,6 +1574,10 @@ Void TEncSlice::encodeSlice   ( TComPic*& rpcPic, TComOutputBitstream* pcSubstre
 #if ENC_DEC_TRACE
     g_bJustDoIt = g_bEncDecTraceEnable;
 #endif
+
+	//gcorrea: 10/03/2013
+	//final_enc = 1;
+
     if ( (m_pcCfg->getSliceMode()!=0 || m_pcCfg->getSliceSegmentMode()!=0) &&
       uiCUAddr == rpcPic->getPicSym()->getCUOrderMap((uiBoundingCUAddr+rpcPic->getNumPartInCU()-1)/rpcPic->getNumPartInCU()-1) )
     {
@@ -1571,6 +1587,11 @@ Void TEncSlice::encodeSlice   ( TComPic*& rpcPic, TComOutputBitstream* pcSubstre
     {
       m_pcCuEncoder->encodeCU( pcCU );
     }
+
+	//gcorrea: 10/03/2013 END
+	//final_enc = 0;
+
+
 #if ENC_DEC_TRACE
     g_bJustDoIt = g_bEncDecTraceDisable;
 #endif    

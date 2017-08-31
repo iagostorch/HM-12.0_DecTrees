@@ -1,4 +1,4 @@
-/* The copyright in this software is being made available under the BSD
+/* The copyexright in this software is being made available under the BSD
  * License, included below. This software may be subject to other third party
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.  
@@ -43,6 +43,50 @@
 #include <cmath>
 #include <algorithm>
 using namespace std;
+
+
+//gcorrea 17/10/2013
+//extern ofstream CU64x64data;
+//extern ofstream CU32x32data;
+//extern ofstream CU16x16data;
+//extern ofstream CU8x8data;
+//
+//extern char filename_64x64[100];
+//extern char filename_32x32[100];
+//extern char filename_16x16[100];
+//extern char filename_8x8[100];
+//
+//extern Pel **saveLumaPel;
+//extern Pel **saveHorGrad;
+//extern Pel **saveVerGrad;
+//
+//extern int count_frame;
+//
+//extern int saveResData2Nx2N;
+//extern double sumRes2Nx2N, medRes2Nx2N, sqdRes2Nx2N, varRes2Nx2N;
+//extern double res_sum_VP1, res_sum_VP2, res_med_VP1, res_med_VP2, res_sqd_VP1, res_sqd_VP2, res_var_VP1, res_var_VP2;
+//extern double res_sum_HP1, res_sum_HP2, res_med_HP1, res_med_HP2, res_sqd_HP1, res_sqd_HP2, res_var_HP1, res_var_HP2;
+//extern double ResHorGrad, ResVerGrad, ResGrad, res_RHV_grad;
+//extern double res_rhi_V, res_rhi_H, res_rhi_Q;
+//extern double res_RHV_sum, res_RHV_med, res_RHV_var, res_RHV_HI;
+//extern double res_HP2Sobel, res_HP1Sobel, res_VP2Sobel, res_VP1Sobel;
+//extern double res_TotalSobelVer_CB, res_TotalSobelHor_CB, res_TotalSobel_CB, res_RHV_Sobel, res_RHV_TotalSobel;
+//extern double res_HP2grad, res_HP1grad, res_VP2grad, res_VP1grad;
+//extern double res_TotalGradVer_CB, res_TotalGradHor_CB, res_TotalGrad_CB, res_RHV_TotalGrad_CB ;
+//extern double res_RHV_sumCoef;
+//extern double res_RHV_sumVar3x3, res_RVH_sumVar3x3, res_sumVar3x3_HP2, res_sumVar3x3_HP1, res_sumVar3x3_VP2, res_sumVar3x3_VP1;
+//extern double ResHorAccGrad, ResVerAccGrad;
+//extern double RDcost_MSM, RDcost_2Nx2N, RDcost_2NxN, RDcost_Nx2N, RDcost_NxN, RDcost_2NxnU, RDcost_2NxnD, RDcost_nLx2N, RDcost_nRx2N;
+//
+//extern int curr_uiDepth;
+//
+//extern long int count_64x64_MSM, count_64x64_MERGE, count_64x64_2Nx2N_MERGE, count_64x64_SKIP, count_64x64_2Nx2N_SKIP, count_64x64_2Nx2N_nonMSM, count_64x64_2Nx2N, count_64x64_2NxN, count_64x64_Nx2N, count_64x64_NxN, count_64x64_2NxnU, count_64x64_2NxnD, count_64x64_nLx2N, count_64x64_nRx2N;
+//extern long int count_32x32_MSM, count_32x32_MERGE, count_32x32_2Nx2N_MERGE, count_32x32_SKIP, count_32x32_2Nx2N_SKIP, count_32x32_2Nx2N_nonMSM, count_32x32_2Nx2N, count_32x32_2NxN, count_32x32_Nx2N, count_32x32_NxN, count_32x32_2NxnU, count_32x32_2NxnD, count_32x32_nLx2N, count_32x32_nRx2N;
+//extern long int count_16x16_MSM, count_16x16_MERGE, count_16x16_2Nx2N_MERGE, count_16x16_SKIP, count_16x16_2Nx2N_SKIP, count_16x16_2Nx2N_nonMSM, count_16x16_2Nx2N, count_16x16_2NxN, count_16x16_Nx2N, count_16x16_NxN, count_16x16_2NxnU, count_16x16_2NxnD, count_16x16_nLx2N, count_16x16_nRx2N;
+//extern long int count_8x8_MSM, count_8x8_MERGE, count_8x8_2Nx2N_MERGE, count_8x8_SKIP, count_8x8_2Nx2N_SKIP, count_8x8_2Nx2N_nonMSM, count_8x8_2Nx2N, count_8x8_2NxN, count_8x8_Nx2N, count_8x8_NxN, count_8x8_2NxnU, count_8x8_2NxnD, count_8x8_nLx2N, count_8x8_nRx2N;
+//
+//extern int final_enc;
+//gcorrea 17/10/2013 END
 
 //! \ingroup TLibEncoder
 //! \{
@@ -264,6 +308,12 @@ Void TEncCu::encodeCU ( TComDataCU* pcCU )
 
   // Encode CU data
   xEncodeCU( pcCU, 0, 0 );
+  
+  //gcorrea: 10/03/2014
+  //if(final_enc == 1) {
+	 // cout << "end CTU" << endl;
+  //}
+  //gcorrea: 10/03/2014 END
 }
 
 // ====================================================================================================================
@@ -388,6 +438,724 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
   Bool isAddLowestQP = false;
   Int lowestQP = -rpcTempCU->getSlice()->getSPS()->getQpBDOffsetY();
 
+
+ // //gcorrea: 17/10/2013
+
+ // UInt CUAddr = rpcBestCU->getAddr();
+ // UInt FrameWidthInLCUs = rpcBestCU->getPic()->getPicSym()->getFrameWidthInCU();
+ // int CUPelX = rpcBestCU->getCUPelX();
+ // int CUPelY = rpcBestCU->getCUPelY();
+ // int n;		// CU dimension
+
+ // curr_uiDepth = uiDepth;
+
+ // if(curr_uiDepth == 0)
+	//  n = 64;
+ // else if(curr_uiDepth == 1)
+	//  n = 32;
+ // else if(curr_uiDepth == 2)
+	//  n = 16;
+ // else
+	//  n = 8;
+ // 
+ // // sum, mean, variance and gradient calculation for the CB
+ // int div;
+
+ // double sum_CB, med_CB, sqd_CB, var_CB, grad_CB, HorGrad, VerGrad, RHV_grad;
+ // double TotalGradVer_CB, TotalGradHor_CB, TotalGrad_CB, RHV_TotalGrad_CB;
+ // double HP2grad, HP1grad, VP2grad, VP1grad;
+ // double local_res_sum_HP2, local_res_sum_HP1, local_res_sum_VP2, local_res_sum_VP1, local_res_RHV_sum, local_res_med_HP2, local_res_med_HP1;
+ // double local_res_med_VP2, local_res_med_VP1, local_res_RHV_med, local_res_var_HP2, local_res_var_HP1, local_res_var_VP2, local_res_var_VP1, local_res_RHV_var;
+ // double local_res_rhi_H, local_res_rhi_V, local_res_RHV_HI, local_res_VP2grad, local_res_VP1grad, local_res_HP2grad, local_res_HP1grad, local_res_RHV_grad;
+ // double local_res_TotalGradVer_CB, local_res_TotalGradHor_CB, local_res_TotalGrad_CB, local_res_RHV_TotalGrad_CB, local_res_VP2Sobel, local_res_VP1Sobel, local_res_HP2Sobel;
+ // double local_res_HP1Sobel, local_res_RHV_Sobel, local_res_TotalSobelHor_CB, local_res_TotalSobelVer_CB, local_res_TotalSobel_CB, local_res_RHV_TotalSobel, local_res_RHV_sumCoef;
+ // double local_res_sumVar3x3_HP2, local_res_sumVar3x3_HP1, local_res_sumVar3x3_VP2, local_res_sumVar3x3_VP1, local_res_RHV_sumVar3x3, local_res_RVH_sumVar3x3, local_ResHorAccGrad, local_ResVerAccGrad;
+
+ // sum_CB = med_CB = sqd_CB = var_CB = 0;
+ // 
+ // RDcost_MSM = RDcost_2Nx2N = RDcost_2NxN = RDcost_Nx2N = RDcost_NxN = RDcost_2NxnU = RDcost_2NxnD = RDcost_nLx2N = RDcost_nRx2N = 0;
+ // //gcorrea 01/11/2013 ENDs
+ // 
+ // 	// GRADIENT CALCULATION
+	//HP2grad = HP1grad = VP2grad = VP1grad = 0;
+	//TotalGradVer_CB = TotalGradHor_CB = TotalGrad_CB = RHV_TotalGrad_CB = 0;
+	//RHV_grad = 0;
+
+	//// GRAD VP1
+	//HorGrad = VerGrad = 0;
+	//for (int i = 0; i < n; i++)
+	//{
+	//	for (int j = 0; j < n/2; j++)
+	//	{
+	//		if(j==0)
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j+1] - saveLumaPel[CUPelY+i][CUPelX+j]);
+	//		else if(j==n-1)
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j] - saveLumaPel[CUPelY+i][CUPelX+j-1]);
+	//		else
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j+1] - saveLumaPel[CUPelY+i][CUPelX+j-1]);
+
+	//		if(i==0)
+	//			VerGrad += abs(saveLumaPel[CUPelY+i+1][CUPelX+j] - saveLumaPel[CUPelY+i][CUPelX+j]);
+	//		else if(i==n-1)
+	//			VerGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j]);
+	//		else
+	//			VerGrad += abs(saveLumaPel[CUPelY+i+1][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j]);
+	//	}
+	//}
+	//double VP1_HorGrad = HorGrad;
+	//double VP1_VerGrad = VerGrad;
+	//VP1grad = (HorGrad+VerGrad)/((n*n)/2);
+
+
+	//// GRAD VP2
+	//HorGrad = VerGrad = 0;
+	//for (int i = 0; i < n; i++)
+	//{
+	//	for (int j = n/2; j < n; j++)
+	//	{
+	//		if(j==0)
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j+1] - saveLumaPel[CUPelY+i][CUPelX+j]);
+	//		else if(j==n-1)
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j] - saveLumaPel[CUPelY+i][CUPelX+j-1]);
+	//		else
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j+1] - saveLumaPel[CUPelY+i][CUPelX+j-1]);
+
+	//		if(i==0)
+	//			VerGrad += abs(saveLumaPel[CUPelY+i+1][CUPelX+j] - saveLumaPel[CUPelY+i][CUPelX+j]);
+	//		else if(i==n-1)
+	//			VerGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j]);
+	//		else
+	//			VerGrad += abs(saveLumaPel[CUPelY+i+1][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j]);
+	//	}
+	//}
+	//double VP2_HorGrad = HorGrad;
+	//double VP2_VerGrad = VerGrad;
+	//VP2grad = (HorGrad+VerGrad)/((n*n)/2);
+
+	//// GRAD HP1
+	//HorGrad = VerGrad = 0;
+	//for (int i = 0; i < n/2; i++)
+	//{
+	//	for (int j = 0; j < n; j++)
+	//	{
+	//		if(j==0)
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j+1] - saveLumaPel[CUPelY+i][CUPelX+j]);
+	//		else if(j==n-1)
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j] - saveLumaPel[CUPelY+i][CUPelX+j-1]);
+	//		else
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j+1] - saveLumaPel[CUPelY+i][CUPelX+j-1]);
+
+	//		if(i==0)
+	//			VerGrad += abs(saveLumaPel[CUPelY+i+1][CUPelX+j] - saveLumaPel[CUPelY+i][CUPelX+j]);
+	//		else if(i==n-1)
+	//			VerGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j]);
+	//		else
+	//			VerGrad += abs(saveLumaPel[CUPelY+i+1][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j]);
+	//	}
+	//}
+	//double HP1_HorGrad = HorGrad;
+	//double HP1_VerGrad = VerGrad;
+	//HP1grad = (HorGrad+VerGrad)/((n*n)/2);
+
+	//// GRAD HP2
+	//HorGrad = VerGrad = 0;
+	//for (int i = n/2; i < n; i++)
+	//{
+	//	for (int j = 0; j < n; j++)
+	//	{
+	//		if(j==0)
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j+1] - saveLumaPel[CUPelY+i][CUPelX+j]);
+	//		else if(j==n-1)
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j] - saveLumaPel[CUPelY+i][CUPelX+j-1]);
+	//		else
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j+1] - saveLumaPel[CUPelY+i][CUPelX+j-1]);
+
+	//		if(i==0)
+	//			VerGrad += abs(saveLumaPel[CUPelY+i+1][CUPelX+j] - saveLumaPel[CUPelY+i][CUPelX+j]);
+	//		else if(i==n-1)
+	//			VerGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j]);
+	//		else
+	//			VerGrad += abs(saveLumaPel[CUPelY+i+1][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j]);
+	//	}
+	//}
+	//double HP2_HorGrad = HorGrad;
+	//double HP2_VerGrad = VerGrad;
+	//HP2grad = (HorGrad+VerGrad)/((n*n)/2);
+
+	//// GRAD TOTAL
+	//HorGrad = VerGrad = 0;
+	//for (int i = 0; i < n; i++)
+	//{
+	//	for (int j = 0; j < n; j++)
+	//	{
+	//		if(j==0)
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j+1] - saveLumaPel[CUPelY+i][CUPelX+j]);
+	//		else if(j==n-1)
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j] - saveLumaPel[CUPelY+i][CUPelX+j-1]);
+	//		else
+	//			HorGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j+1] - saveLumaPel[CUPelY+i][CUPelX+j-1]);
+
+	//		if(i==0)
+	//			VerGrad += abs(saveLumaPel[CUPelY+i+1][CUPelX+j] - saveLumaPel[CUPelY+i][CUPelX+j]);
+	//		else if(i==n-1)
+	//			VerGrad += abs(saveLumaPel[CUPelY+i][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j]);
+	//		else
+	//			VerGrad += abs(saveLumaPel[CUPelY+i+1][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j]);
+	//	}
+	//}
+	//TotalGradVer_CB = VerGrad/(n*n);
+	//TotalGradHor_CB = HorGrad/(n*n);
+
+	//TotalGrad_CB = TotalGradVer_CB+TotalGradHor_CB;
+	////gcorrea: 21/10/2013 END
+
+
+	//// SOBEL CALCULATION
+	//double vertical_sobel, horizontal_sobel;
+	//double HP2Sobel, HP1Sobel, VP2Sobel, VP1Sobel;
+	//double TotalSobelVer_CB, TotalSobelHor_CB, TotalSobel_CB, RHV_Sobel, RHV_TotalSobel_CB;
+
+	//HP2Sobel = HP1Sobel = VP2Sobel = VP1Sobel = 0;
+	//TotalSobelVer_CB = TotalSobelHor_CB = TotalSobel_CB = RHV_Sobel = RHV_TotalSobel_CB = 0;
+
+	//// SOBEL VP1
+	//vertical_sobel = horizontal_sobel = 0;
+	//for (int i = 1; i < n-1; i++)
+	//{
+	//	for (int j = 1; j < n/2-1; j++)
+	//	{
+	//		vertical_sobel += abs(saveLumaPel[CUPelY+i-1][CUPelX+j+1] + 2*saveLumaPel[CUPelY+i][CUPelX+j+1] + saveLumaPel[CUPelY+i+1][CUPelX+j+1] - saveLumaPel[CUPelY+i-1][CUPelX+j-1] - 2*saveLumaPel[CUPelY+i][CUPelX+j-1] - saveLumaPel[CUPelY+i+1][CUPelX+j-1]);
+	//		horizontal_sobel += abs(saveLumaPel[CUPelY+i+1][CUPelX+j-1] + 2*saveLumaPel[CUPelY+i+1][CUPelX+j] + saveLumaPel[CUPelY+i+1][CUPelX+j+1] - saveLumaPel[CUPelY+i-1][CUPelX+j-1] - 2*saveLumaPel[CUPelY+i-1][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j+1]);
+	//	}
+	//}
+	//vertical_sobel /= (n*n)/2;
+	//horizontal_sobel /= (n*n)/2;
+	//VP1Sobel = vertical_sobel+horizontal_sobel;
+
+	//// SOBEL VP2
+	//vertical_sobel = horizontal_sobel = 0;
+	//for (int i = 1; i < n-1; i++)
+	//{
+	//	for (int j = n/2+1; j < n-1; j++)
+	//	{
+	//		vertical_sobel += abs(saveLumaPel[CUPelY+i-1][CUPelX+j+1] + 2*saveLumaPel[CUPelY+i][CUPelX+j+1] + saveLumaPel[CUPelY+i+1][CUPelX+j+1] - saveLumaPel[CUPelY+i-1][CUPelX+j-1] - 2*saveLumaPel[CUPelY+i][CUPelX+j-1] - saveLumaPel[CUPelY+i+1][CUPelX+j-1]);
+	//		horizontal_sobel += abs(saveLumaPel[CUPelY+i+1][CUPelX+j-1] + 2*saveLumaPel[CUPelY+i+1][CUPelX+j] + saveLumaPel[CUPelY+i+1][CUPelX+j+1] - saveLumaPel[CUPelY+i-1][CUPelX+j-1] - 2*saveLumaPel[CUPelY+i-1][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j+1]);
+	//	}
+	//}
+	//vertical_sobel /= (n*n)/2;
+	//horizontal_sobel /= (n*n)/2;
+	//VP2Sobel = vertical_sobel+horizontal_sobel;
+
+	//// SOBEL HP1
+	//vertical_sobel = horizontal_sobel = 0;
+	//for (int i = 1; i < n/2-1; i++)
+	//{
+	//	for (int j = 1; j < n-1; j++)
+	//	{
+	//		vertical_sobel += abs(saveLumaPel[CUPelY+i-1][CUPelX+j+1] + 2*saveLumaPel[CUPelY+i][CUPelX+j+1] + saveLumaPel[CUPelY+i+1][CUPelX+j+1] - saveLumaPel[CUPelY+i-1][CUPelX+j-1] - 2*saveLumaPel[CUPelY+i][CUPelX+j-1] - saveLumaPel[CUPelY+i+1][CUPelX+j-1]);
+	//		horizontal_sobel += abs(saveLumaPel[CUPelY+i+1][CUPelX+j-1] + 2*saveLumaPel[CUPelY+i+1][CUPelX+j] + saveLumaPel[CUPelY+i+1][CUPelX+j+1] - saveLumaPel[CUPelY+i-1][CUPelX+j-1] - 2*saveLumaPel[CUPelY+i-1][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j+1]);
+	//	}
+	//}
+	//vertical_sobel /= (n*n)/2;
+	//horizontal_sobel /= (n*n)/2;
+	//HP1Sobel = vertical_sobel+horizontal_sobel;
+
+	//// SOBEL HP2
+	//vertical_sobel = horizontal_sobel = 0;
+	//for (int i = n/2+1; i < n-1; i++)
+	//{
+	//	for (int j = 1; j < n-1; j++)
+	//	{
+	//		vertical_sobel += abs(saveLumaPel[CUPelY+i-1][CUPelX+j+1] + 2*saveLumaPel[CUPelY+i][CUPelX+j+1] + saveLumaPel[CUPelY+i+1][CUPelX+j+1] - saveLumaPel[CUPelY+i-1][CUPelX+j-1] - 2*saveLumaPel[CUPelY+i][CUPelX+j-1] - saveLumaPel[CUPelY+i+1][CUPelX+j-1]);
+	//		horizontal_sobel += abs(saveLumaPel[CUPelY+i+1][CUPelX+j-1] + 2*saveLumaPel[CUPelY+i+1][CUPelX+j] + saveLumaPel[CUPelY+i+1][CUPelX+j+1] - saveLumaPel[CUPelY+i-1][CUPelX+j-1] - 2*saveLumaPel[CUPelY+i-1][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j+1]);
+	//	}
+	//}
+	//vertical_sobel /= (n*n)/2;
+	//horizontal_sobel /= (n*n)/2;
+	//HP2Sobel = vertical_sobel+horizontal_sobel;
+	// 
+	//// SOBEL TOTAL
+	//vertical_sobel = horizontal_sobel = 0;
+	//for (int i = 1; i < n-1; i++)
+	//{
+	//	for (int j = 1; j < n-1; j++)
+	//	{
+	//		vertical_sobel += abs(saveLumaPel[CUPelY+i-1][CUPelX+j+1] + 2*saveLumaPel[CUPelY+i][CUPelX+j+1] + saveLumaPel[CUPelY+i+1][CUPelX+j+1] - saveLumaPel[CUPelY+i-1][CUPelX+j-1] - 2*saveLumaPel[CUPelY+i][CUPelX+j-1] - saveLumaPel[CUPelY+i+1][CUPelX+j-1]);
+	//		horizontal_sobel += abs(saveLumaPel[CUPelY+i+1][CUPelX+j-1] + 2*saveLumaPel[CUPelY+i+1][CUPelX+j] + saveLumaPel[CUPelY+i+1][CUPelX+j+1] - saveLumaPel[CUPelY+i-1][CUPelX+j-1] - 2*saveLumaPel[CUPelY+i-1][CUPelX+j] - saveLumaPel[CUPelY+i-1][CUPelX+j+1]);
+	//	}
+	//}
+	//TotalSobelVer_CB = vertical_sobel/(n*n);
+	//TotalSobelHor_CB = horizontal_sobel/(n*n);
+
+	//TotalSobel_CB = TotalSobelVer_CB+TotalSobelHor_CB;
+	////gcorrea: 21/10/2013 END
+	//
+
+
+
+ // for(int i = 0; i < n; i++) {
+	//  for(int j = 0; j < n; j++) {
+	//	  sum_CB += (saveLumaPel[CUPelY+i][CUPelX+j]);			// sums all luma samples in the CB
+	//  }
+ // }
+
+ // med_CB = sum_CB / (n*n);			// average of luma samples in the CB
+ // 
+ // for(int i = 0; i < n; i++)		// calculates the sum of squared differences
+	//  for(int j = 0; j < n; j++)
+	//	  sqd_CB += ((saveLumaPel[CUPelY+i][CUPelX+j] - med_CB) * (saveLumaPel[CUPelY+i][CUPelX+j] - med_CB));
+ // 
+ // var_CB = sqd_CB / (n*n);		// variance of luma samples in the PU
+
+
+ // // sum, mean and variance calculation for the two vertical halves of the CB
+ // double sum_VP1, sum_VP2, med_VP1, med_VP2, sqd_VP1, sqd_VP2, var_VP1, var_VP2;
+ // sum_VP1 = sum_VP2 = med_VP1 = med_VP2 = sqd_VP1 = sqd_VP2 = var_VP1 = var_VP2 = 0;
+
+ // for(int i = 0; i < n; i++)
+	//  for(int j = 0; j < n/2; j++)
+	//	  sum_VP1 += (saveLumaPel[CUPelY+i][CUPelX+j]);			// sums all luma samples in VP1
+
+ // for(int i = 0; i < n; i++)
+	//  for(int j = n/2; j < n; j++)
+	//	  sum_VP2 += (saveLumaPel[CUPelY+i][CUPelX+j]);			// sums all luma samples in VP2
+
+ // med_VP1 = sum_VP1 / (n*n)/2;			// average of luma samples in VP1
+ // med_VP2 = sum_VP2 / (n*n)/2;			// average of luma samples in VP2
+
+ // for(int i = 0; i < n; i++)			// calculates the sum of squared differences in VP1
+	//  for(int j = 0; j < n/2; j++)
+	//	  sqd_VP1 += ((saveLumaPel[CUPelY+i][CUPelX+j] - med_VP1) * (saveLumaPel[CUPelY+i][CUPelX+j] - med_VP1));
+
+ // for(int i = 0; i < n; i++)			// calculates the sum of squared differences in VP2
+	//  for(int j = n/2; j < n; j++)
+	//	  sqd_VP2 += ((saveLumaPel[CUPelY+i][CUPelX+j] - med_VP2) * (saveLumaPel[CUPelY+i][CUPelX+j] - med_VP2));
+
+ // var_VP1 = sqd_VP2 / (n*n)/2;		// variance of luma samples in the PU
+ // var_VP2 = sqd_VP1 / (n*n)/2;		// variance of luma samples in the PU
+
+
+ // // sum, mean and variance calculation for the two horizontal halves of the CB
+ // double sum_HP1, sum_HP2, med_HP1, med_HP2, sqd_HP1, sqd_HP2, var_HP1, var_HP2;
+ // sum_HP1 = sum_HP2 = med_HP1 = med_HP2 = sqd_HP1 = sqd_HP2 = var_HP1 = var_HP2 = 0;
+
+ // for(int i = 0; i < n/2; i++)
+	//  for(int j = 0; j < n; j++)
+	//	  sum_HP1 += (saveLumaPel[CUPelY+i][CUPelX+j]);			// sums all luma samples in HP1
+
+ // for(int i = n/2; i < n; i++)
+	//  for(int j = 0; j < n; j++)
+	//	  sum_HP2 += (saveLumaPel[CUPelY+i][CUPelX+j]);			// sums all luma samples in HP2
+
+ // med_HP1 = sum_HP1 / (n*n)/2;			// average of luma samples in HP1
+ // med_HP2 = sum_HP2 / (n*n)/2;			// average of luma samples in HP2
+
+ // for(int i = 0; i < n/2; i++)			// calculates the sum of squared differences in HP1
+	//  for(int j = 0; j < n; j++)
+	//	  sqd_HP1 += ((saveLumaPel[CUPelY+i][CUPelX+j] - med_HP1) * (saveLumaPel[CUPelY+i][CUPelX+j] - med_HP1));
+
+ // for(int i = n/2; i < n; i++)			// calculates the sum of squared differences in HP2
+	//  for(int j = 0; j < n; j++)
+	//	  sqd_HP2 += ((saveLumaPel[CUPelY+i][CUPelX+j] - med_HP2) * (saveLumaPel[CUPelY+i][CUPelX+j] - med_HP2));
+
+ // var_HP1 = sqd_HP2 / (n*n)/2;		// variance of luma samples in the PU
+ // var_HP2 = sqd_HP1 / (n*n)/2;		// variance of luma samples in the PU
+
+ // 
+ // // vertical, horizontal and quadrant homogeneity index for the CB
+ // double VHI_CB, HHI_CB, QHI_CB;
+ // VHI_CB = HHI_CB = QHI_CB = -1;
+ // 
+ // // computes the average of the residue in sub-block 1/16
+ // double sum_r1 = 0;
+ // for(int i = 0; i < n/4; i++)
+	//  for(int j = 0; j < n/4; j++)
+	//	  sum_r1 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r1 = sum_r1/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 2/16
+ // double sum_r2 = 0;
+ // for(int i = 0; i < n/4; i++)
+	//  for(int j = n/4; j < n/2; j++)
+	//	  sum_r2 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r2 = sum_r2/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 3/16
+ // double sum_r3 = 0;
+ // for(int i = 0; i < n/4; i++)
+	//  for(int j = n/2; j < 3*n/4; j++)
+	//	  sum_r3 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r3 = sum_r3/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 4/16
+ // double sum_r4 = 0;
+ // for(int i = 0; i < n/4; i++)
+	//  for(int j = 3*n/4; j < n; j++)
+	//	  sum_r4 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r4 = sum_r4/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 5/16
+ // double sum_r5 = 0;
+ // for(int i = n/4; i < n/2; i++)
+	//  for(int j = 0; j < n/4; j++)
+	//	  sum_r5 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r5 = sum_r5/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 6/16
+ // double sum_r6 = 0;
+ // for(int i = n/4; i < n/2; i++)
+	//  for(int j = n/4; j < n/2; j++)
+	//	  sum_r6 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r6 = sum_r6/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 7/16
+ // double sum_r7 = 0;
+ // for(int i = n/4; i < n/2; i++)
+	//  for(int j = n/2; j < 3*n/4; j++)
+	//	  sum_r7 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r7 = sum_r7/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 8/16
+ // double sum_r8 = 0;
+ // for(int i = n/4; i < n/2; i++)
+	//  for(int j = 3*n/4; j < n; j++)
+	//	  sum_r8 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r8 = sum_r8/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 9/16
+ // double sum_r9 = 0;
+ // for(int i = n/2; i < 3*n/4; i++)
+	//  for(int j = 0; j < n/4; j++)
+	//	  sum_r9 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r9 = sum_r9/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 10/16
+ // double sum_r10 = 0;
+ // for(int i = n/2; i < 3*n/4; i++)
+	//  for(int j = n/4; j < n/2; j++)
+	//	  sum_r10 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r10 = sum_r10/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 11/16
+ // double sum_r11 = 0;
+ // for(int i = n/2; i < 3*n/4; i++)
+	//  for(int j = n/2; j < 3*n/4; j++)
+	//	  sum_r11 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r11 = sum_r11/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 12/16
+ // double sum_r12 = 0;
+ // for(int i = n/2; i < 3*n/4; i++)
+	//   for(int j = 3*n/4; j < n; j++)
+	//	  sum_r12 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r12 = sum_r12/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 13/16
+ // double sum_r13 = 0;
+ // for(int i = 3*n/4; i < n; i++)
+	//  for(int j = 0; j < n/4; j++)
+	//	  sum_r13 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r13 = sum_r13/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 14/16
+ // double sum_r14 = 0;
+ // for(int i = 3*n/4; i < n; i++)
+	//  for(int j = n/4; j < n/2; j++)
+	//	  sum_r14 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r14 = sum_r14/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 15/16
+ // double sum_r15 = 0;
+ // for(int i = 3*n/4; i < n; i++)
+	//  for(int j = n/2; j < 3*n/4; j++)
+	//	  sum_r15 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r15 = sum_r15/((n/4)*(n/4));
+ // // computes the average of the residue in sub-block 16/16
+ // double sum_r16 = 0;
+ // for(int i = 3*n/4; i < n; i++)
+	//  for(int j = 3*n/4; j < n; j++)
+	//	  sum_r16 += (saveLumaPel[CUPelY+i][CUPelX+j]);
+ // double med_r16 = sum_r16/((n/4)*(n/4));
+ // 
+ // double med_med_V1 = (med_r1 + med_r5 + med_r9 + med_r13) / 4;
+ // double med_med_V2 = (med_r2 + med_r6 + med_r10 + med_r14) / 4;
+ // double med_med_V3 = (med_r3 + med_r7 + med_r11 + med_r15) / 4;
+ // double med_med_V4 = (med_r4 + med_r8 + med_r12 + med_r16) / 4;
+
+ // double med_med_H1 = (med_r1 + med_r2 + med_r3 + med_r4) / 4;
+ // double med_med_H2 = (med_r5 + med_r6 + med_r7 + med_r8) / 4;
+ // double med_med_H3 = (med_r9 + med_r10 + med_r11 + med_r12) / 4;
+ // double med_med_H4 = (med_r13 + med_r14 + med_r15 + med_r16) / 4;
+ // 
+ // double med_med_Q1 = (med_r1 + med_r2 + med_r5 + med_r6) / 4;
+ // double med_med_Q2 = (med_r3 + med_r4 + med_r7 + med_r8) / 4;
+ // double med_med_Q3 = (med_r9 + med_r10 + med_r13 + med_r14) / 4;
+ // double med_med_Q4 = (med_r11 + med_r12 + med_r15 + med_r16) / 4;
+ // 
+ // double mad_V1 = (abs(med_r1 - med_med_V1) + abs(med_r5 - med_med_V1) + abs(med_r9 - med_med_V1) + abs(med_r13 - med_med_V1)) / 4;
+ // double mad_V2 = (abs(med_r2 - med_med_V2) + abs(med_r6 - med_med_V2) + abs(med_r10 - med_med_V2) + abs(med_r14 - med_med_V2)) / 4;
+ // double mad_V3 = (abs(med_r3 - med_med_V3) + abs(med_r7 - med_med_V3) + abs(med_r11 - med_med_V3) + abs(med_r15 - med_med_V3)) / 4;
+ // double mad_V4 = (abs(med_r4 - med_med_V4) + abs(med_r8 - med_med_V4) + abs(med_r12 - med_med_V4) + abs(med_r16 - med_med_V4)) / 4;
+ // 
+ // double mad_H1 = (abs(med_r1 - med_med_H1) + abs(med_r2 - med_med_H1) + abs(med_r3 - med_med_H1) + abs(med_r4 - med_med_H1)) / 4;
+ // double mad_H2 = (abs(med_r5 - med_med_H2) + abs(med_r6 - med_med_H2) + abs(med_r7 - med_med_H2) + abs(med_r8 - med_med_H2)) / 4;
+ // double mad_H3 = (abs(med_r9 - med_med_H3) + abs(med_r10 - med_med_H3) + abs(med_r11 - med_med_H3) + abs(med_r12 - med_med_H3)) / 4;
+ // double mad_H4 = (abs(med_r13 - med_med_H4) + abs(med_r14 - med_med_H4) + abs(med_r15 - med_med_H4) + abs(med_r16 - med_med_H4)) / 4;
+ // 
+ // double mad_Q1 = (abs(med_r1 - med_med_Q1) + abs(med_r2 - med_med_Q1) + abs(med_r5 - med_med_Q1) + abs(med_r6 - med_med_Q1)) / 4;
+ // double mad_Q2 = (abs(med_r3 - med_med_Q2) + abs(med_r4 - med_med_Q2) + abs(med_r7 - med_med_Q2) + abs(med_r8 - med_med_Q2)) / 4;
+ // double mad_Q3 = (abs(med_r9 - med_med_Q3) + abs(med_r10 - med_med_Q3) + abs(med_r13 - med_med_Q3) + abs(med_r14 - med_med_Q3)) / 4;
+ // double mad_Q4 = (abs(med_r11 - med_med_Q4) + abs(med_r12 - med_med_Q4) + abs(med_r15 - med_med_Q4) + abs(med_r16 - med_med_Q4)) / 4;
+ // 
+ // VHI_CB = (mad_V1 + mad_V2 + mad_V3 + mad_V4) / 4;
+ // HHI_CB = (mad_H1 + mad_H2 + mad_H3 + mad_H4) / 4;
+ // QHI_CB = (mad_Q1 + mad_Q2 + mad_Q3 + mad_Q4) / 4;
+
+
+ // //CALC HADAMARD
+ // 
+ // // create coef block
+ // Pel **coefBlk = new Pel* [n];
+ // for(int i = 0; i < n; i++)
+	//  coefBlk[i] = new Pel[n];
+ // 
+ // // copy luma block
+ // Pel **lumaBlk = new Pel* [n];
+ // for(int i = 0; i < n; i++)
+	//  lumaBlk[i] = new Pel[n];
+ // 
+ // for (int i = 0; i < n; i++)
+ // {
+	//  for (int j = 0; j < n; j++)
+	//  {
+	//	  lumaBlk[i][j] = saveLumaPel[CUPelY+i][CUPelX+j];
+	//	  coefBlk[i][j] = 0;
+	//  }
+ // }
+
+ // int m = n;
+ // for(int i = 0; i < n; i++) {
+
+	//  unsigned j, bit, k;
+	//  double temp;
+
+	//  for (j = 0; j < m; j+=2) {
+	//	  k = j+1;
+	//	  coefBlk[i][j] = lumaBlk[i][j] + lumaBlk[i][k];
+	//	  coefBlk[i][k] = lumaBlk[i][j] - lumaBlk[i][k];
+	//  }
+
+	//  for (bit = 2; bit < m; bit <<= 1) {   
+	//	for (j = 0; j < m; j++) {
+	//		if( (bit & j) == 0 ) {
+	//			  k = j | bit;
+	//			  temp = coefBlk[i][j];
+	//			  coefBlk[i][j] = coefBlk[i][j] + coefBlk[i][k];
+	//			  coefBlk[i][k] = temp - coefBlk[i][k];
+	//		}
+	//	}
+	//  }
+ // }
+ // 
+ // int *sumCoefRow = new int [n];
+ // int *sumCoefCol = new int [n];
+
+ // for (int i = 0; i < n; i++)
+ // {
+	//  sumCoefRow[i] = 0;
+	//  sumCoefCol[i] = 0;
+ // }  
+
+ // for (int i = 0; i < n; i++)
+ // {
+	//  for (int j = 0; j < n; j++)
+	//  {
+	//	  sumCoefRow[i] += abs(coefBlk[i][j]);
+	//  }
+	//  
+ // }
+ // sumCoefRow[0] -= abs(coefBlk[0][0]);
+
+ // for (int i = 0; i < n; i++)
+ // {
+	//  for (int j = 0; j < n; j++)
+	//  {
+	//	  sumCoefCol[i] += abs(coefBlk[j][i]);
+	//  }
+ // }
+ // sumCoefCol[0] -= abs(coefBlk[0][0]);
+
+ // double RHV_sumCoef = 0;
+ // if(sumCoefCol[0]==0)
+	//RHV_sumCoef = (double)sumCoefRow[0];
+ // else
+	//RHV_sumCoef =  (double)sumCoefRow[0] / (double)sumCoefCol[0];
+
+ // //int RHV_sumCoef = 0;
+ // //for (int i = 0; i < n; i++)
+ // //{
+	// // if(sumCoefCol[i]==0)
+	//	//  RHV_sumCoef += sumCoefRow[i];
+	// // else
+	//	//  RHV_sumCoef +=  sumCoefRow[i] / sumCoefCol[i];
+ // //}
+
+
+
+ // // CALC VAR 3X3 VP1
+ // double sumVar3x3_VP1 = 0;
+ // for (int i = 1; i < n-1; i++)
+ // {
+	//  for (int j = 1; j < n/2-1; j++)
+	//  {
+	//	  double sum3x3 = 0;
+	//	  double med3x3 = 0;
+	//	  double sqd3x3 = 0;
+	//	  double var3x3 = 0;
+	//	  sum3x3 = (lumaBlk[i-1][j-1] + lumaBlk[i-1][j] + lumaBlk[i-1][j+1] + lumaBlk[i][j-1] + lumaBlk[i][j] + lumaBlk[i][j+1] + lumaBlk[i+1][j-1] + lumaBlk[i+1][j] + lumaBlk[i+1][j+1]);
+	//	  med3x3 = (double)sum3x3 / (double)9;
+	//	  sqd3x3 =  (lumaBlk[i-1][j-1]-med3x3)*(lumaBlk[i-1][j-1]-med3x3) +
+	//				(lumaBlk[i-1][j]-med3x3)*(lumaBlk[i-1][j]-med3x3) +
+	//				(lumaBlk[i-1][j+1]-med3x3)*(lumaBlk[i-1][j+1]-med3x3) +
+	//				(lumaBlk[i][j-1]-med3x3)*(lumaBlk[i][j-1]-med3x3) +
+	//				(lumaBlk[i][j]-med3x3)*(lumaBlk[i][j]-med3x3) +
+	//				(lumaBlk[i][j+1]-med3x3)*(lumaBlk[i][j+1]-med3x3) +
+	//				(lumaBlk[i+1][j-1]-med3x3)*(lumaBlk[i+1][j-1]-med3x3) +
+	//				(lumaBlk[i+1][j]-med3x3)*(lumaBlk[i+1][j]-med3x3) +
+	//				(lumaBlk[i+1][j+1]-med3x3)*(lumaBlk[i+1][j+1]-med3x3);
+	//	  var3x3 = (double)sqd3x3 / (double)9;
+	//	  sumVar3x3_VP1 += var3x3;
+	//  } 
+ // }
+
+ // // CALC VAR 3X3 VP2
+ // double sumVar3x3_VP2 = 0;
+ // for (int i = 1; i < n-1; i++)
+ // {
+	//  for (int j = n/2+1; j < n-1; j++)
+	//  {
+	//	  double sum3x3 = 0;
+	//	  double med3x3 = 0;
+	//	  double sqd3x3 = 0;
+	//	  double var3x3 = 0;
+	//	  sum3x3 = (lumaBlk[i-1][j-1] + lumaBlk[i-1][j] + lumaBlk[i-1][j+1] + lumaBlk[i][j-1] + lumaBlk[i][j] + lumaBlk[i][j+1] + lumaBlk[i+1][j-1] + lumaBlk[i+1][j] + lumaBlk[i+1][j+1]);
+	//	  med3x3 = (double)sum3x3 / (double)9;
+	//	  sqd3x3 =  (lumaBlk[i-1][j-1]-med3x3)*(lumaBlk[i-1][j-1]-med3x3) +
+	//				(lumaBlk[i-1][j]-med3x3)*(lumaBlk[i-1][j]-med3x3) +
+	//				(lumaBlk[i-1][j+1]-med3x3)*(lumaBlk[i-1][j+1]-med3x3) +
+	//				(lumaBlk[i][j-1]-med3x3)*(lumaBlk[i][j-1]-med3x3) +
+	//				(lumaBlk[i][j]-med3x3)*(lumaBlk[i][j]-med3x3) +
+	//				(lumaBlk[i][j+1]-med3x3)*(lumaBlk[i][j+1]-med3x3) +
+	//				(lumaBlk[i+1][j-1]-med3x3)*(lumaBlk[i+1][j-1]-med3x3) +
+	//				(lumaBlk[i+1][j]-med3x3)*(lumaBlk[i+1][j]-med3x3) +
+	//				(lumaBlk[i+1][j+1]-med3x3)*(lumaBlk[i+1][j+1]-med3x3);
+	//	  var3x3 = (double)sqd3x3 / (double)9;
+	//	  sumVar3x3_VP2 += var3x3;
+	//  } 
+ // }
+
+ // // CALC VAR 3X3 HP1
+ // double sumVar3x3_HP1 = 0;
+ // for (int i = 1; i < n/2-1; i++)
+ // {
+	//  for (int j = 1; j < n-1; j++)
+	//  {
+	//	  double sum3x3 = 0;
+	//	  double med3x3 = 0;
+	//	  double sqd3x3 = 0;
+	//	  double var3x3 = 0;
+	//	  sum3x3 = (lumaBlk[i-1][j-1] + lumaBlk[i-1][j] + lumaBlk[i-1][j+1] + lumaBlk[i][j-1] + lumaBlk[i][j] + lumaBlk[i][j+1] + lumaBlk[i+1][j-1] + lumaBlk[i+1][j] + lumaBlk[i+1][j+1]);
+	//	  med3x3 = (double)sum3x3 / (double)9;
+	//	  sqd3x3 =  (lumaBlk[i-1][j-1]-med3x3)*(lumaBlk[i-1][j-1]-med3x3) +
+	//				(lumaBlk[i-1][j]-med3x3)*(lumaBlk[i-1][j]-med3x3) +
+	//				(lumaBlk[i-1][j+1]-med3x3)*(lumaBlk[i-1][j+1]-med3x3) +
+	//				(lumaBlk[i][j-1]-med3x3)*(lumaBlk[i][j-1]-med3x3) +
+	//				(lumaBlk[i][j]-med3x3)*(lumaBlk[i][j]-med3x3) +
+	//				(lumaBlk[i][j+1]-med3x3)*(lumaBlk[i][j+1]-med3x3) +
+	//				(lumaBlk[i+1][j-1]-med3x3)*(lumaBlk[i+1][j-1]-med3x3) +
+	//				(lumaBlk[i+1][j]-med3x3)*(lumaBlk[i+1][j]-med3x3) +
+	//				(lumaBlk[i+1][j+1]-med3x3)*(lumaBlk[i+1][j+1]-med3x3);
+	//	  var3x3 = (double)sqd3x3 / (double)9;
+	//	  sumVar3x3_HP1 += var3x3;
+	//  } 
+ // }
+
+ // // CALC VAR 3X3 HP2
+ // double sumVar3x3_HP2 = 0;
+ // for (int i = n/2+1; i < n-1; i++)
+ // {
+	//  for (int j = 1; j < n-1; j++)
+	//  {
+	//	  double sum3x3 = 0;
+	//	  double med3x3 = 0;
+	//	  double sqd3x3 = 0;
+	//	  double var3x3 = 0;
+	//	  sum3x3 = (lumaBlk[i-1][j-1] + lumaBlk[i-1][j] + lumaBlk[i-1][j+1] + lumaBlk[i][j-1] + lumaBlk[i][j] + lumaBlk[i][j+1] + lumaBlk[i+1][j-1] + lumaBlk[i+1][j] + lumaBlk[i+1][j+1]);
+	//	  med3x3 = (double)sum3x3 / (double)9;
+	//	  sqd3x3 =  (lumaBlk[i-1][j-1]-med3x3)*(lumaBlk[i-1][j-1]-med3x3) +
+	//				(lumaBlk[i-1][j]-med3x3)*(lumaBlk[i-1][j]-med3x3) +
+	//				(lumaBlk[i-1][j+1]-med3x3)*(lumaBlk[i-1][j+1]-med3x3) +
+	//				(lumaBlk[i][j-1]-med3x3)*(lumaBlk[i][j-1]-med3x3) +
+	//				(lumaBlk[i][j]-med3x3)*(lumaBlk[i][j]-med3x3) +
+	//				(lumaBlk[i][j+1]-med3x3)*(lumaBlk[i][j+1]-med3x3) +
+	//				(lumaBlk[i+1][j-1]-med3x3)*(lumaBlk[i+1][j-1]-med3x3) +
+	//				(lumaBlk[i+1][j]-med3x3)*(lumaBlk[i+1][j]-med3x3) +
+	//				(lumaBlk[i+1][j+1]-med3x3)*(lumaBlk[i+1][j+1]-med3x3);
+	//	  var3x3 = (double)sqd3x3 / (double)9;
+	//	  sumVar3x3_HP2 += var3x3;
+	//  } 
+ // }
+ // 
+ // for(int i = 0; i < n; i++) {
+	//  delete[] lumaBlk[i];
+	//  delete[] coefBlk[i];
+ // }
+ // delete[] lumaBlk;
+ // delete[] coefBlk;
+
+ // delete[] sumCoefRow;
+ // delete[] sumCoefCol;
+
+
+ // // calculate ratios
+ // double denom; 
+
+ // if(sumVar3x3_VP2-sumVar3x3_VP1==0)
+	//  denom = 0.1;
+ // else
+	//  denom = sumVar3x3_VP2-sumVar3x3_VP1;
+ // double RHV_sumVar3x3 = abs(sumVar3x3_HP2-sumVar3x3_HP1) / abs(denom);
+
+ // if(sum_VP2-sum_VP1==0)
+	//  denom = 0.1;
+ // else
+	//  denom = sum_VP2-sum_VP1;
+ // double RHV_sum = abs(sum_HP2-sum_HP1) / abs(denom);
+
+ // if(med_VP2-med_VP1==0)
+	//  denom = 0.1;
+ // else
+	//  denom = med_VP2-med_VP1;
+ // double RHV_med = abs(med_HP2-med_HP1) / abs(denom);
+
+ // if(var_VP2-var_VP1==0)
+	//  denom = 0.1;
+ // else
+	//  denom = var_VP2-var_VP1;
+ // double RHV_var = abs(var_HP2-var_HP1) / abs(denom);
+ // 
+ // if(HP2grad-HP1grad==0)
+	//  denom = 0.1;
+ // else
+	//  denom = HP2grad-HP1grad;
+ // RHV_grad = abs(VP2grad-VP1grad) / abs(denom);
+
+ // if(TotalGradHor_CB==0)
+	//  TotalGradHor_CB = 0.1;
+ // RHV_TotalGrad_CB = TotalGradVer_CB / TotalGradHor_CB;
+	// 
+ // if(HP2Sobel-HP1Sobel==0)
+	//  denom = 0.1;
+ // else
+	//  denom = HP2Sobel-HP1Sobel;
+ // RHV_Sobel = abs(VP2Sobel-VP1Sobel) / abs(denom);
+
+ // if(TotalSobelHor_CB==0)
+	//  TotalSobelHor_CB = 0.1;
+ // RHV_TotalSobel_CB = TotalSobelVer_CB / TotalSobelHor_CB;
+
+ // if(VHI_CB==0)
+	//  VHI_CB = 0.1;
+ // double RHV_HI = (HHI_CB / VHI_CB);
+ // //gcorrea: 17/10/2013 END
+
+
   if( (g_uiMaxCUWidth>>uiDepth) >= rpcTempCU->getSlice()->getPPS()->getMinCuDQPSize() )
   {
     Int idQP = m_pcEncCfg->getMaxDeltaQP();
@@ -443,22 +1211,88 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
         // 2Nx2N
         if(m_pcEncCfg->getUseEarlySkipDetection())
         {
-          xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_2Nx2N );  rpcTempCU->initEstData( uiDepth, iQP );//by Competition for inter_2Nx2N
+		  //gcorrea: 06/09/2013
+			//saveResData2Nx2N=1;
+			xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_2Nx2N );  rpcTempCU->initEstData( uiDepth, iQP );//by Competition for inter_2Nx2N
+			//saveResData2Nx2N=0;
+		  //gcorrea: 06/09/2013 END
         }
         // SKIP
         xCheckRDCostMerge2Nx2N( rpcBestCU, rpcTempCU, &earlyDetectionSkipMode );//by Merge for inter_2Nx2N
+		//RDcost_MSM = rpcBestCU->getTotalCost();
+
+		//cout << "\tgetMergeFlag: " << rpcBestCU->getMergeFlag( 0 ) << "\tisSkipped: " << rpcBestCU->isSkipped( 0 ) << "\tgetTotalCost: " << rpcBestCU->getTotalCost() << endl;
+
+
         rpcTempCU->initEstData( uiDepth, iQP );
 
         if(!m_pcEncCfg->getUseEarlySkipDetection())
         {
           // 2Nx2N, NxN
-          xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_2Nx2N );  rpcTempCU->initEstData( uiDepth, iQP );
+			//gcorrea: 06/09/2013
+			//saveResData2Nx2N=1;
+			xCheckRDCostInter( rpcBestCU, rpcTempCU, SIZE_2Nx2N );  rpcTempCU->initEstData( uiDepth, iQP );
+			//saveResData2Nx2N=0;
+			//gcorrea: 06/09/2013 END
           if(m_pcEncCfg->getUseCbfFastMode())
           {
             doNotBlockPu = rpcBestCU->getQtRootCbf( 0 ) != 0;
           }
         }
       }
+
+	//  // gcorrea 01/11/2013
+	//  //save values calculated from residue to local variables
+	//	local_res_sum_HP2 = res_sum_HP2;
+	//	local_res_sum_HP1 = res_sum_HP1;
+	//	local_res_sum_VP2 = res_sum_VP2;
+	//	local_res_sum_VP1 = res_sum_VP1;
+	//	local_res_RHV_sum = res_RHV_sum;
+	//	local_res_med_HP2 = res_med_HP2;
+	//	local_res_med_HP1 = res_med_HP1;
+	//	local_res_med_VP2 = res_med_VP2;
+	//	local_res_med_VP1 = res_med_VP1;
+	//	local_res_RHV_med = res_RHV_med;
+	//	local_res_var_HP2 = res_var_HP2;
+	//	local_res_var_HP1 = res_var_HP1;
+	//	local_res_var_VP2 = res_var_VP2;
+	//	local_res_var_VP1 = res_var_VP1;
+	//	local_res_RHV_var = res_RHV_var;
+	//	local_res_rhi_H = res_rhi_H;
+	//	local_res_rhi_V = res_rhi_V;
+	//	local_res_RHV_HI = res_RHV_HI;
+	//	local_res_VP2grad = res_VP2grad;
+	//	local_res_VP1grad = res_VP1grad;
+	//	local_res_HP2grad = res_HP2grad;
+	//	local_res_HP1grad = res_HP1grad;
+	//	local_res_RHV_grad = res_RHV_grad;
+	//	local_res_TotalGradVer_CB = res_TotalGradVer_CB;
+	//	local_res_TotalGradHor_CB = res_TotalGradHor_CB;
+	//	local_res_TotalGrad_CB = res_TotalGrad_CB;
+	//	local_res_RHV_TotalGrad_CB = res_RHV_TotalGrad_CB;
+	//	local_res_VP2Sobel = res_VP2Sobel;
+	//	local_res_VP1Sobel = res_VP1Sobel;
+	//	local_res_HP2Sobel = res_HP2Sobel;
+	//	local_res_HP1Sobel = res_HP1Sobel;
+	//	local_res_RHV_Sobel = res_RHV_Sobel;
+	//	local_res_TotalSobelHor_CB = res_TotalSobelHor_CB;
+	//	local_res_TotalSobelVer_CB = res_TotalSobelVer_CB;
+	//	local_res_TotalSobel_CB = res_TotalSobel_CB;
+	//	local_res_RHV_TotalSobel = res_RHV_TotalSobel;
+	//	local_res_RHV_sumCoef = res_RHV_sumCoef;
+	//	local_res_sumVar3x3_HP2 = res_sumVar3x3_HP2;
+	//	local_res_sumVar3x3_HP1 = res_sumVar3x3_HP1;
+	//	local_res_sumVar3x3_VP2 = res_sumVar3x3_VP2;
+	//	local_res_sumVar3x3_VP1 = res_sumVar3x3_VP1;
+	//	local_res_RHV_sumVar3x3 = res_RHV_sumVar3x3;
+	//	local_res_RVH_sumVar3x3 = res_RVH_sumVar3x3;
+	//	local_ResHorAccGrad = ResHorAccGrad;
+	//	local_ResVerAccGrad = ResVerAccGrad;
+	//// gcorrea 01/11/2013 END
+
+
+
+
 
       if (isAddLowestQP && (iQP == lowestQP))
       {
@@ -522,11 +1356,12 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
           if( pcPic->getSlice(0)->getSPS()->getAMPAcc(uiDepth) )
           {
 #if AMP_ENC_SPEEDUP        
-            Bool bTestAMP_Hor = false, bTestAMP_Ver = false;
 
+			Bool bTestAMP_Hor = false, bTestAMP_Ver = false;
 #if AMP_MRG
             Bool bTestMergeAMP_Hor = false, bTestMergeAMP_Ver = false;
 
+			
             deriveTestModeAMP (rpcBestCU, eParentPartSize, bTestAMP_Hor, bTestAMP_Ver, bTestMergeAMP_Hor, bTestMergeAMP_Ver);
 #else
             deriveTestModeAMP (rpcBestCU, eParentPartSize, bTestAMP_Hor, bTestAMP_Ver);
@@ -748,6 +1583,293 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
     iMaxQP  = Clip3( MIN_QP, MAX_QP, qp);
   }
 #endif
+
+  ////gcorrea: 17/10/2013
+  //double bestCost = rpcBestCU->getTotalCost();
+  //int mode = rpcBestCU->getPredictionMode( 0 );
+  //int part = rpcBestCU->getPartitionSize( 0 );
+  //int divide;
+  //
+  //if(mode==0 && part==0)
+	 // divide = 0;
+  //else
+	 // divide = 1;
+  ////gcorrea: 17/10/2013 END
+
+
+  //
+  //if(mode==0) {
+
+	 // if(uiDepth==0) {
+		//  if(part==0) {
+		//	  count_64x64_2Nx2N++;
+		//	  if(rpcBestCU->getMergeFlag( 0 )) {
+		//		  count_64x64_MSM++;  
+		//		  if(rpcBestCU->isSkipped( 0 )) {
+		//			  count_64x64_SKIP++;
+		//			  count_64x64_2Nx2N_SKIP++;
+		//		  }
+		//		  else {
+		//			  count_64x64_MERGE++;
+		//			  count_64x64_2Nx2N_MERGE++;
+		//		  }
+		//	  }
+		//	  else
+		//		  count_64x64_2Nx2N_nonMSM++;
+		//  }
+		//  else if(part==1) {
+		//	  count_64x64_2NxN++;
+		//  }
+		//  else if(part==2) {
+		//	  count_64x64_Nx2N++;
+		//  }
+		//  else if(part==3) {
+		//	  count_64x64_NxN++;
+		//  }
+		//  else if(part==4) {
+		//	  count_64x64_2NxnU++;
+		//  }
+		//  else if(part==5) {
+		//	  count_64x64_2NxnD++;
+		//  }
+		//  else if(part==6) {
+		//	  count_64x64_nLx2N++;
+		//  }
+		//  else if(part==7) {
+		//	  count_64x64_nRx2N++;
+		//  }
+
+		//  if(part > 0) {
+		//	  if(rpcBestCU->getMergeFlag( 0 )) {
+		//		  count_64x64_MSM++;
+		//		  if(rpcBestCU->isSkipped( 0 )) {
+		//			  count_64x64_SKIP++;
+		//		  }
+		//		  else {
+		//			  count_64x64_MERGE++;
+		//		  }
+		//	  }
+		//  }
+	 // }
+
+	 // else if(uiDepth==1) {
+		//  if(part==0) {
+		//	  count_32x32_2Nx2N++;
+		//	  if(rpcBestCU->getMergeFlag( 0 )) {
+		//		  count_32x32_MSM++;  
+		//		  if(rpcBestCU->isSkipped( 0 )) {
+		//			  count_32x32_SKIP++;
+		//			  count_32x32_2Nx2N_SKIP++;
+		//		  }
+		//		  else {
+		//			  count_32x32_MERGE++;
+		//			  count_32x32_2Nx2N_MERGE++;
+		//		  }
+		//	  }
+		//	  else
+		//		  count_32x32_2Nx2N_nonMSM++;
+		//  }
+		//  else if(part==1) {
+		//	  count_32x32_2NxN++;
+		//  }
+		//  else if(part==2) {
+		//	  count_32x32_Nx2N++;
+		//  }
+		//  else if(part==3) {
+		//	  count_32x32_NxN++;
+		//  }
+		//  else if(part==4) {
+		//	  count_32x32_2NxnU++;
+		//  }
+		//  else if(part==5) {
+		//	  count_32x32_2NxnD++;
+		//  }
+		//  else if(part==6) {
+		//	  count_32x32_nLx2N++;
+		//  }
+		//  else if(part==7) {
+		//	  count_32x32_nRx2N++;
+		//  }
+
+		//  if(part > 0) {
+		//	  if(rpcBestCU->getMergeFlag( 0 )) {
+		//		  count_32x32_MSM++;
+		//		  if(rpcBestCU->isSkipped( 0 )) {
+		//			  count_32x32_SKIP++;
+		//		  }
+		//		  else {
+		//			  count_32x32_MERGE++;
+		//		  }
+		//	  }
+		//  }
+	 // }
+
+	 // else if(uiDepth==2) {
+		//  if(part==0) {
+		//	  count_16x16_2Nx2N++;
+		//	  if(rpcBestCU->getMergeFlag( 0 )) {
+		//		  count_16x16_MSM++;  
+		//		  if(rpcBestCU->isSkipped( 0 )) {
+		//			  count_16x16_SKIP++;
+		//			  count_16x16_2Nx2N_SKIP++;
+		//		  }
+		//		  else {
+		//			  count_16x16_MERGE++;
+		//			  count_16x16_2Nx2N_MERGE++;
+		//		  }
+		//	  }
+		//	  else
+		//		  count_16x16_2Nx2N_nonMSM++;
+		//  }
+		//  else if(part==1) {
+		//	  count_16x16_2NxN++;
+		//  }
+		//  else if(part==2) {
+		//	  count_16x16_Nx2N++;
+		//  }
+		//  else if(part==3) {
+		//	  count_16x16_NxN++;
+		//  }
+		//  else if(part==4) {
+		//	  count_16x16_2NxnU++;
+		//  }
+		//  else if(part==5) {
+		//	  count_16x16_2NxnD++;
+		//  }
+		//  else if(part==6) {
+		//	  count_16x16_nLx2N++;
+		//  }
+		//  else if(part==7) {
+		//	  count_16x16_nRx2N++;
+		//  }
+
+		//  if(part > 0) {
+		//	  if(rpcBestCU->getMergeFlag( 0 )) {
+		//		  count_16x16_MSM++;
+		//		  if(rpcBestCU->isSkipped( 0 )) {
+		//			  count_16x16_SKIP++;
+		//		  }
+		//		  else {
+		//			  count_16x16_MERGE++;
+		//		  }
+		//	  }
+		//  }
+	 // }
+
+	 // else if(uiDepth==3) {
+		//  if(part==0) {
+		//	  count_8x8_2Nx2N++;
+		//	  if(rpcBestCU->getMergeFlag( 0 )) {
+		//		  count_8x8_MSM++;  
+		//		  if(rpcBestCU->isSkipped( 0 )) {
+		//			  count_8x8_SKIP++;
+		//			  count_8x8_2Nx2N_SKIP++;
+		//		  }
+		//		  else {
+		//			  count_8x8_MERGE++;
+		//			  count_8x8_2Nx2N_MERGE++;
+		//		  }
+		//	  }
+		//	  else
+		//		  count_8x8_2Nx2N_nonMSM++;
+		//  }
+		//  else if(part==1) {
+		//	  count_8x8_2NxN++;
+		//  }
+		//  else if(part==2) {
+		//	  count_8x8_Nx2N++;
+		//  }
+		//  else if(part==3) {
+		//	  count_8x8_NxN++;
+		//  }
+		//  else if(part==4) {
+		//	  count_8x8_2NxnU++;
+		//  }
+		//  else if(part==5) {
+		//	  count_8x8_2NxnD++;
+		//  }
+		//  else if(part==6) {
+		//	  count_8x8_nLx2N++;
+		//  }
+		//  else if(part==7) {
+		//	  count_8x8_nRx2N++;
+		//  }
+
+		//  if(part > 0) {
+		//	  if(rpcBestCU->getMergeFlag( 0 )) {
+		//		  count_8x8_MSM++;
+		//		  if(rpcBestCU->isSkipped( 0 )) {
+		//			  count_8x8_SKIP++;
+		//		  }
+		//		  else {
+		//			  count_8x8_MERGE++;
+		//		  }
+		//	  }
+		//  }
+	 // }
+
+  //}
+
+
+
+
+  ////gcorrea: 18/11/2013
+  //if(mode==0) {
+	 // int partDir = -1;
+	 // if ((part == 1) || (part == 4) || (part == 5))		// horizontal partitioning
+		//  partDir = 0;
+	 // else if ((part == 2) || (part == 6) || (part == 7))	// vertical partitioning
+		//  partDir = 1;
+	 // else if  (part == 3)									//hor+ver partitioning 
+		//  partDir = 2;
+
+
+	 // if(uiDepth == 0) {
+		//  CU64x64data.open(filename_64x64, ios::out | ios::app);
+		//  if(CU64x64data.is_open()) {
+		//	  CU64x64data << RDcost_MSM << '\t' << RDcost_2Nx2N << '\t' << RDcost_2NxN  << '\t' <<  RDcost_Nx2N  << '\t' <<  RDcost_NxN  << '\t' <<  RDcost_2NxnU  << '\t' <<  RDcost_2NxnD  << '\t' <<  RDcost_nLx2N  << '\t' <<  RDcost_nRx2N  << '\t';
+		//	  CU64x64data << part << '\t' << rpcBestCU->getMergeFlag( 0 ) << '\t' << (rpcBestCU->isSkipped( 0 ) && rpcBestCU->getMergeFlag( 0 )) << endl;
+		//	  CU64x64data.close();
+		//  }
+	 // }
+
+
+	  //else if(uiDepth == 1) {
+		 // CU32x32data.open(filename_32x32, ios::out | ios::app);
+		 // if(CU32x32data.is_open()) {
+			//  CU32x32data << RDcost_MSM << '\t' << RDcost_2Nx2N << '\t' << RDcost_2NxN  << '\t' <<  RDcost_Nx2N  << '\t' <<  RDcost_NxN  << '\t' <<  RDcost_2NxnU  << '\t' <<  RDcost_2NxnD  << '\t' <<  RDcost_nLx2N  << '\t' <<  RDcost_nRx2N  << '\t';
+			//  CU32x32data << part << '\t' << rpcBestCU->getMergeFlag( 0 ) << '\t' << (rpcBestCU->isSkipped( 0 ) && rpcBestCU->getMergeFlag( 0 )) << endl;
+			//  CU32x32data.close();
+			//  CU32x32data.close();
+		 // }
+	  //}
+
+	  //else if(uiDepth == 2) {
+		 // CU16x16data.open(filename_16x16, ios::out | ios::app);
+		 // if(CU16x16data.is_open()) {
+			//  CU16x16data << RDcost_MSM << '\t' << RDcost_2Nx2N << '\t' << RDcost_2NxN  << '\t' <<  RDcost_Nx2N  << '\t' <<  RDcost_NxN  << '\t' <<  RDcost_2NxnU  << '\t' <<  RDcost_2NxnD  << '\t' <<  RDcost_nLx2N  << '\t' <<  RDcost_nRx2N  << '\t';
+			//  CU16x16data << part << '\t' << rpcBestCU->getMergeFlag( 0 ) << '\t' << (rpcBestCU->isSkipped( 0 ) && rpcBestCU->getMergeFlag( 0 )) << endl;
+			//  CU16x16data.close();
+			//  CU16x16data.close();
+		 // }
+	  //}
+
+	  //else if(uiDepth == 3) {
+		 // CU8x8data.open(filename_8x8, ios::out | ios::app);
+		 // if(CU8x8data.is_open()) {
+			//  CU8x8data << RDcost_MSM << '\t' << RDcost_2Nx2N << '\t' << RDcost_2NxN  << '\t' <<  RDcost_Nx2N  << '\t' <<  RDcost_NxN  << '\t' <<  RDcost_2NxnU  << '\t' <<  RDcost_2NxnD  << '\t' <<  RDcost_nLx2N  << '\t' <<  RDcost_nRx2N  << '\t';
+			//  CU8x8data << part << '\t' << rpcBestCU->getMergeFlag( 0 ) << '\t' << (rpcBestCU->isSkipped( 0 ) && rpcBestCU->getMergeFlag( 0 )) << endl;
+			//  CU8x8data.close();
+			//  CU8x8data.close();
+		 // }
+	  //}
+
+  //}
+  //gcorrea 18/11/2013 END
+
+
+
+
   for (Int iQP=iMinQP; iQP<=iMaxQP; iQP++)
   {
     if (isAddLowestQP && (iQP == iMinQP))
@@ -876,6 +1998,16 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
       {
         rpcBestCU->getTotalCost()=rpcTempCU->getTotalCost()+1;
       }
+
+	  ////gcorrea: 19/02/2014
+	  //if( rpcTempCU->getTotalCost() < rpcBestCU->getTotalCost() )		//Temp: CU dividida; Best: CU nao dividida
+		 // div = 1;
+	  //else
+		 // div = 0;
+
+	  //(int) (rpcTempCU->getCUAbove())->getDepth();
+	  //gcorrea: 19/02/2014 END
+
       xCheckBestMode( rpcBestCU, rpcTempCU, uiDepth);                                  // RD compare current larger prediction
     }                                                                                  // with sub partitioned prediction.
     if (isAddLowestQP && (iQP == lowestQP))
@@ -887,6 +2019,176 @@ Void TEncCu::xCompressCU( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, UInt u
   rpcBestCU->copyToPic(uiDepth);                                                     // Copy Best data to Picture for next partition prediction.
 
   xCopyYuv2Pic( rpcBestCU->getPic(), rpcBestCU->getAddr(), rpcBestCU->getZorderIdxInCU(), uiDepth, uiDepth, rpcBestCU, uiLPelX, uiTPelY );   // Copy Yuv data to picture Yuv
+
+
+
+
+  //gcorrea: 17/02/2014
+
+
+
+ // if(mode==0) {
+	//  int partDir = -1;
+	//  if ((part == 1) || (part == 4) || (part == 5))		// horizontal partitioning
+	//	  partDir = 0;
+	//  else if ((part == 2) || (part == 6) || (part == 7))	// vertical partitioning
+	//	  partDir = 1;
+	//  else if  (part == 3)									//hor+ver partitioning 
+	//	  partDir = 2;
+
+	//  //if(uiDepth == 1)
+	//	 // cout << '\t';
+	//  //if(uiDepth == 2)
+	//	 // cout << '\t' << '\t';
+	//  //if(uiDepth == 3)
+	//	 // cout << '\t' << '\t' << '\t';
+	//  
+	// // cout << (int) rpcBestCU->getZorderIdxInCU() << '\t' << (int) rpcBestCU->getDepth(0) << '\t' << (int) rpcBestCU->getWidth(0) << endl;
+
+
+	//double med_Above = -1;
+	//double med_AboveLeft = -1;
+	//double med_AboveRight = -1;
+	//double med_Left = -1;
+	//double med_Colocated1 = -1;
+	//double med_Colocated2 = -1;
+	//double sum_med = 0;
+	//double med_med = -1;
+	//double diff_NeiDepth = 0;
+
+	//int i;
+	//int j;
+	//double sum;
+
+	//i = j = sum = 0;
+	//for(i=0; i<256; i+=4) {
+	//	if(rpcBestCU->getCUAbove() != NULL) {
+	//		sum += (double) ((rpcBestCU->getCUAbove())->getDepth(i));
+	//		j++;
+	//	}
+	//}
+	//if(j>0)
+	//	med_Above = sum/j;
+
+	//i = j = sum = 0;
+	//for(i=0; i<256; i+=4) {
+	//	if(rpcBestCU->getCUAboveLeft() != NULL) {
+	//		sum += (double) ((rpcBestCU->getCUAboveLeft())->getDepth(i));
+	//		j++;
+	//	}
+	//}
+	//if(j>0)
+	//	med_AboveLeft = sum/j;
+
+	//i = j = sum = 0;
+	//for(i=0; i<256; i+=4) {
+	//	if(rpcBestCU->getCUAboveRight() != NULL) {
+	//		sum += (double) ((rpcBestCU->getCUAboveRight())->getDepth(i));
+	//		j++;
+	//	}
+	//}
+	//if(j>0)
+	//	med_AboveRight = sum/j;
+
+	//i = j = sum = 0;
+	//for(i=0; i<256; i+=4) {
+	//	if(rpcBestCU->getCULeft() != NULL) {
+	//		sum += (double) ((rpcBestCU->getCULeft())->getDepth(i));
+	//		j++;
+	//	}
+	//}
+	//if(j>0)
+	//	med_Left = sum/j;
+
+	//i = j = sum = 0;
+	//for(i=0; i<256; i+=4) {
+	//	if(rpcBestCU->getCUColocated(REF_PIC_LIST_0) != NULL) {
+	//		sum += (double) ((rpcBestCU->getCUColocated(REF_PIC_LIST_0))->getDepth(i));
+	//		j++;
+	//	}
+	//}
+	//if(j>0)
+	//	med_Colocated1 = sum/j;
+
+	//i = j = sum = 0;
+	//for(i=0; i<256; i+=4) {
+	//	if(rpcBestCU->getCUColocated(REF_PIC_LIST_1) != NULL) {
+	//		sum += (double) ((rpcBestCU->getCUColocated(REF_PIC_LIST_1))->getDepth(i));
+	//		j++;
+	//	}
+	//}
+	//if(j>0)
+	//	med_Colocated2 = sum/j;
+
+
+	//j = 0;
+	//if(med_Above != -1) {
+	//	sum_med += med_Above;
+	//	j++;
+	//}
+	//if(med_AboveLeft != -1) {
+	//	sum_med += med_AboveLeft;
+	//	j++;
+	//}
+	//if(med_AboveRight != -1) {
+	//	sum_med += med_AboveRight;
+	//	j++;
+	//}
+	//if(med_Left != -1) {
+	//	sum_med += med_Left;
+	//	j++;
+	//}
+	//if(med_Colocated1 != -1) {
+	//	sum_med += med_Colocated1;
+	//	j++;
+	//}
+	//if(med_Colocated2 != -1) {
+	//	sum_med += med_Colocated2;
+	//	j++;
+	//}
+
+	//if(j>0) {
+	//	med_med = sum_med/j;
+	//	diff_NeiDepth = med_med - uiDepth;
+	//}
+	//else {
+	//	med_med = -1;
+	//	diff_NeiDepth = 0;
+	//}
+
+	//cout << med_Above << '\t' << med_AboveLeft << '\t' << med_AboveRight << '\t' << med_Left << '\t' << med_Colocated1 << '\t' << med_Colocated2 << '\t' << sum_med << '\t' << med_med << '\t' << diff_NeiDepth << endl;
+
+
+	  //if(uiDepth == 0) {
+		 // CU64x64data.open(filename_64x64, ios::out | ios::app);
+		 // if(CU64x64data.is_open()) {
+			//  CU64x64data << RDcost_MSM << '\t' << RDcost_2Nx2N << '\t' << RDcost_2NxN  << '\t' <<  RDcost_Nx2N  << '\t';
+			//  CU64x64data << part << '\t' << rpcBestCU->getMergeFlag( 0 ) << '\t' << (rpcBestCU->isSkipped( 0 ) && rpcBestCU->getMergeFlag( 0 )) << '\t' << med_med << '\t' << diff_NeiDepth << '\t' << div << endl;
+			//  CU64x64data.close();
+		 // }
+	  //}
+
+	  //else if(uiDepth == 1) {
+		 // CU32x32data.open(filename_32x32, ios::out | ios::app);
+		 // if(CU32x32data.is_open()) {
+			//  CU32x32data << RDcost_MSM << '\t' << RDcost_2Nx2N << '\t' << RDcost_2NxN  << '\t' <<  RDcost_Nx2N  << '\t';
+			//  CU32x32data << part << '\t' << rpcBestCU->getMergeFlag( 0 ) << '\t' << (rpcBestCU->isSkipped( 0 ) && rpcBestCU->getMergeFlag( 0 )) << '\t' << med_med << '\t' << diff_NeiDepth << '\t' << div << endl;
+			//  CU32x32data.close();
+		 // }
+	  //}
+
+	  //else if(uiDepth == 2) {
+		 // CU16x16data.open(filename_16x16, ios::out | ios::app);
+		 // if(CU16x16data.is_open()) {
+			//  CU16x16data << RDcost_MSM << '\t' << RDcost_2Nx2N << '\t' << RDcost_2NxN  << '\t' <<  RDcost_Nx2N  << '\t';
+			//  CU16x16data << part << '\t' << rpcBestCU->getMergeFlag( 0 ) << '\t' << (rpcBestCU->isSkipped( 0 ) && rpcBestCU->getMergeFlag( 0 )) << '\t' << med_med << '\t' << diff_NeiDepth << '\t' << div << endl;
+			//  CU16x16data.close();
+		 // }
+	  //}
+
+  //}
+  //gcorrea: 17/02/2014 END
+
   if( bBoundary ||(bSliceEnd && bInsidePicture))
   {
     return;
@@ -1109,6 +2411,13 @@ Void TEncCu::xEncodeCU( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth )
   // Encode Coefficients
   Bool bCodeDQP = getdQPFlag();
   m_pcEntropyCoder->encodeCoeff( pcCU, uiAbsPartIdx, uiDepth, pcCU->getWidth (uiAbsPartIdx), pcCU->getHeight(uiAbsPartIdx), bCodeDQP );
+
+  //gcorrea: 10/03/2014
+  //if(final_enc == 1) {
+	 // cout << "end CU" << endl;
+  //}
+  //gcorrea: 10/03/2014 END
+
   setdQPFlag( bCodeDQP );
 
   // --- write terminating bit ---
@@ -1398,6 +2707,26 @@ Void TEncCu::xCheckRDCostInter( TComDataCU*& rpcBestCU, TComDataCU*& rpcTempCU, 
   rpcTempCU->getTotalCost()  = m_pcRdCost->calcRdCost( rpcTempCU->getTotalBits(), rpcTempCU->getTotalDistortion() );
 
   xCheckDQP( rpcTempCU );
+
+  //gcorrea 01/11/2013
+  //if(ePartSize==SIZE_2Nx2N)
+	 // RDcost_2Nx2N = rpcTempCU->getTotalCost();
+  //else if(ePartSize==SIZE_2NxN)
+	 // RDcost_2NxN = rpcTempCU->getTotalCost();
+  //else if(ePartSize==SIZE_Nx2N)
+	 // RDcost_Nx2N = rpcTempCU->getTotalCost();
+  //else if(ePartSize==SIZE_NxN)
+	 // RDcost_NxN = rpcTempCU->getTotalCost();
+  //else if(ePartSize==SIZE_2NxnU)
+	 // RDcost_2NxnU = rpcTempCU->getTotalCost();
+  //else if(ePartSize==SIZE_2NxnD)
+	 // RDcost_2NxnD = rpcTempCU->getTotalCost();
+  //else if(ePartSize==SIZE_nLx2N)
+	 // RDcost_nLx2N = rpcTempCU->getTotalCost();
+  //else if(ePartSize==SIZE_nRx2N)
+	 // RDcost_nRx2N = rpcTempCU->getTotalCost();
+  //gcorrea 01/11/2013 ENDs
+
   xCheckBestMode(rpcBestCU, rpcTempCU, uhDepth);
 }
 

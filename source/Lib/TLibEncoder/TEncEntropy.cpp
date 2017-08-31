@@ -39,6 +39,9 @@
 #include "TLibCommon/TypeDef.h"
 #include "TLibCommon/TComSampleAdaptiveOffset.h"
 
+//gcorrea
+extern int final_enc;
+
 //! \ingroup TLibEncoder
 //! \{
 
@@ -220,6 +223,24 @@ Void TEncEntropy::encodeIPCMInfo( TComDataCU* pcCU, UInt uiAbsPartIdx, Bool bRD 
 Void TEncEntropy::xEncodeTransform( TComDataCU* pcCU,UInt offsetLuma, UInt offsetChroma, UInt uiAbsPartIdx, UInt uiDepth, UInt width, UInt height, UInt uiTrIdx, Bool& bCodeDQP )
 {
   const UInt uiSubdiv = pcCU->getTransformIdx( uiAbsPartIdx ) + pcCU->getDepth( uiAbsPartIdx ) > uiDepth;
+
+  //cout << "uiAbsPartIdx: " << (int) uiAbsPartIdx << '\t' << "pcCU->getTransformIdx( uiAbsPartIdx ): " << (int) pcCU->getTransformIdx( uiAbsPartIdx ) << '\t' << "pcCU->getDepth( uiAbsPartIdx ): " << (int) pcCU->getDepth( uiAbsPartIdx ) << '\t' << "uiDepth: " << (int) uiDepth << '\t' << "uiSubdiv: " << (int) uiSubdiv << endl; 
+  
+  //gcorrea
+  //if(final_enc == 1) {
+
+	 // if((int)width == 32)
+		//  cout << '\t' << (int) width << '\t' << (int) uiDepth << '\t' << (int) uiTrIdx << '\t' << (int) offsetLuma << '\t' << (int) pcCU->getWidth(0) << endl;
+  //
+	 // if((int)width == 16)
+		//  cout << '\t' << '\t' << (int) width << '\t' << (int) uiDepth << '\t' << (int) uiTrIdx << '\t' << (int) offsetLuma << '\t' << (int) pcCU->getWidth(0) << endl;
+  //
+	 // if((int)width == 8)
+		//  cout << '\t' << '\t' << '\t' << (int) width << '\t' << (int) uiDepth << '\t' << (int) uiTrIdx << '\t' << (int) offsetLuma << '\t' << (int) pcCU->getWidth(0) << endl;
+
+  //}
+  //gcorrea END
+
   const UInt uiLog2TrafoSize = g_aucConvertToBit[pcCU->getSlice()->getSPS()->getMaxCUWidth()]+2 - uiDepth;
   UInt cbfY = pcCU->getCbf( uiAbsPartIdx, TEXT_LUMA    , uiTrIdx );
   UInt cbfU = pcCU->getCbf( uiAbsPartIdx, TEXT_CHROMA_U, uiTrIdx );
@@ -604,6 +625,7 @@ Void TEncEntropy::encodeCoeff( TComDataCU* pcCU, UInt uiAbsPartIdx, UInt uiDepth
   }
   
   xEncodeTransform( pcCU, uiLumaOffset, uiChromaOffset, uiAbsPartIdx, uiDepth, uiWidth, uiHeight, 0, bCodeDQP);
+
 }
 
 Void TEncEntropy::encodeCoeffNxN( TComDataCU* pcCU, TCoeff* pcCoeff, UInt uiAbsPartIdx, UInt uiTrWidth, UInt uiTrHeight, UInt uiDepth, TextType eType )
